@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { AdzunaJob } from './adzuna.interface';
+import { AdzunaJob } from './types/adzuna.interface';
 import { Logger } from '@nestjs/common';
 
 interface getJobsParams {

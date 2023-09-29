@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AdzunaService } from './adzuna.service';
+import { AdzunaService } from '../adzuna.service';
 import { ConfigService } from '@nestjs/config';
-import { AdzunaJob } from './adzuna.interface';
+import { AdzunaJob } from '../types/adzuna.interface';
 import axios from 'axios';
 
 jest.mock('axios');

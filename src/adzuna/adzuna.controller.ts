@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AdzunaService } from './adzuna.service';
-import { AdzunaJob } from './adzuna.interface';
+import { AdzunaJob } from './types/adzuna.interface';
 
 @Controller('adzuna')
 export class AdzunaController {
