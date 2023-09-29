@@ -2,7 +2,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { AdzunaService } from './adzuna.service';
 import { AdzunaJob } from './types/adzuna.interface';
 
-@Controller('adzuna')
+@Controller('api/v1')
 export class AdzunaController {
   constructor(private readonly adzunaService: AdzunaService) {}
 
