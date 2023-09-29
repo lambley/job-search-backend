@@ -15,4 +15,9 @@ describe('AdzunaService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should return an array of jobs', async () => {
+    const result = await service.getJobs();
+    expect(result).toBeInstanceOf(Array);
+  });
 });
