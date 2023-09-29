@@ -17,7 +17,13 @@ describe('AdzunaService', () => {
   });
 
   it('should return an array of jobs', async () => {
-    const result = await service.getJobs();
+    const result = await service.getJobs({
+      results_per_page: 5,
+      what: 'javascript developer',
+      where: 'london',
+    });
+
     expect(result).toBeInstanceOf(Array);
+    expect(result.length).toEqual(5);
   });
 });
