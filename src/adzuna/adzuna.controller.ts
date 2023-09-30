@@ -21,4 +21,11 @@ export class AdzunaController {
       where: encodedWhere,
     });
   }
+
+  @Get('/jobs/:id')
+  async getJob(@Query() query: { id: string }): Promise<AdzunaJob> {
+    const { id } = query;
+
+    return this.adzunaService.getJob(id);
+  }
 }

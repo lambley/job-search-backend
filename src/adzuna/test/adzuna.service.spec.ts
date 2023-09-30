@@ -57,58 +57,90 @@ describe('AdzunaService', () => {
     service = module.get<AdzunaService>(AdzunaService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('getJobs', () => {
+    it('should be defined', () => {
+      expect(service.getJobs).toBeDefined();
+    });
+
+    it('should return an array of jobs', async () => {
+      const mockResponse = {
+        data: {
+          results: adzunaResultsFactory(5),
+        },
+      };
+      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await service.getJobs(params);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(5);
+    });
+
+    it('should log the number of jobs found', async () => {
+      const mockResponse = {
+        data: {
+          results: adzunaResultsFactory(5),
+        },
+      };
+      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+
+      const loggerSpy = jest.spyOn(Logger, 'log');
+
+      const result = await service.getJobs(params);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(5);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        `${result.length} jobs found`,
+        'AdzunaJobService',
+      );
+    });
+
+    it('should log an error message if the API call fails', async () => {
+      (axios.get as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+      const loggerSpy = jest.spyOn(Logger, 'error');
+
+      const result = await service.getJobs(params);
+
+      console.log('result:', result);
+      console.log('loggerSpy.mock.calls:', loggerSpy.mock.calls);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(0);
+
+      expect(loggerSpy).toHaveBeenCalledWith(`~ API Error`);
+    });
   });
 
-  it('should return an array of jobs', async () => {
-    const mockResponse = {
-      data: {
-        results: adzunaResultsFactory(5),
-      },
-    };
-    (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+  describe('getJob', () => {
+    it('should be defined', () => {
+      expect(service.getJob).toBeDefined();
+    });
 
-    const result = await service.getJobs(params);
+    it('should return a job', async () => {
+      const mockResponse = {
+        data: adzunaResultsFactory(1)[0],
+      };
+      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toEqual(5);
-  });
+      const result = await service.getJob('1234567890');
 
-  it('should log the number of jobs found', async () => {
-    const mockResponse = {
-      data: {
-        results: adzunaResultsFactory(5),
-      },
-    };
-    (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+      expect(result).toBeInstanceOf(Object);
+      expect(result.id).toEqual('1234567890');
+    });
 
-    const loggerSpy = jest.spyOn(Logger, 'log');
+    it('should log an error message if the API call fails', async () => {
+      (axios.get as jest.Mock).mockRejectedValue(new Error('API Error'));
 
-    const result = await service.getJobs(params);
+      const loggerSpy = jest.spyOn(Logger, 'error');
 
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toEqual(5);
+      const result = await service.getJob('1234567890');
 
-    expect(loggerSpy).toHaveBeenCalledWith(
-      `${result.length} jobs found`,
-      'AdzunaJobService',
-    );
-  });
+      expect(result).toBeNull();
 
-  it('should log an error message if the API call fails', async () => {
-    (axios.get as jest.Mock).mockRejectedValue(new Error('API Error'));
-
-    const loggerSpy = jest.spyOn(Logger, 'error');
-
-    const result = await service.getJobs(params);
-
-    console.log('result:', result);
-    console.log('loggerSpy.mock.calls:', loggerSpy.mock.calls);
-
-    expect(result).toBeInstanceOf(Array);
-    expect(result.length).toEqual(0);
-
-    expect(loggerSpy).toHaveBeenCalledWith(`~ API Error`);
+      expect(loggerSpy).toHaveBeenCalledWith(`~ API Error`);
+    });
   });
 });
