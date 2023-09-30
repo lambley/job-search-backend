@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AdzunaService } from '../adzuna.service';
+import { JobService } from '../job.service';
 import { ConfigService } from '@nestjs/config';
-import { AdzunaJob } from '../types/adzuna.interface';
+import { Job } from '../types/job.interface';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 
 jest.mock('axios');
 
-const adzunaResultsFactory = (count: number): AdzunaJob[] => {
-  const results: AdzunaJob[] = [];
+const jobResultsFactory = (count: number): Job[] => {
+  const results: Job[] = [];
 
   for (let i = 0; i < count; i++) {
     results.push({
@@ -46,15 +46,15 @@ const params = {
   where: 'london',
 };
 
-describe('AdzunaService', () => {
-  let service: AdzunaService;
+describe('JobService', () => {
+  let service: JobService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AdzunaService, ConfigService],
+      providers: [JobService, ConfigService],
     }).compile();
 
-    service = module.get<AdzunaService>(AdzunaService);
+    service = module.get<JobService>(JobService);
   });
 
   describe('getJobs', () => {
@@ -65,7 +65,7 @@ describe('AdzunaService', () => {
     it('should return an array of jobs', async () => {
       const mockResponse = {
         data: {
-          results: adzunaResultsFactory(5),
+          results: jobResultsFactory(5),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -79,7 +79,7 @@ describe('AdzunaService', () => {
     it('should log the number of jobs found', async () => {
       const mockResponse = {
         data: {
-          results: adzunaResultsFactory(5),
+          results: jobResultsFactory(5),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -93,7 +93,7 @@ describe('AdzunaService', () => {
 
       expect(loggerSpy).toHaveBeenCalledWith(
         `${result.length} jobs found`,
-        'AdzunaJobService',
+        'JobService',
       );
     });
 
@@ -121,7 +121,7 @@ describe('AdzunaService', () => {
 
     it('should return a job', async () => {
       const mockResponse = {
-        data: adzunaResultsFactory(1)[0],
+        data: jobResultsFactory(1)[0],
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 

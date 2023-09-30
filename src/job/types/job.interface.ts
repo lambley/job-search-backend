@@ -1,31 +1,31 @@
-interface AdzunaLocation {
+interface JobLocation {
   area: string[];
   display_name: string;
 }
 
-interface AdzunaCategory {
+interface JobCategory {
   label: string;
   tag: string;
 }
 
-interface AdzunaCompany {
+interface JobCompany {
   display_name: string;
 }
 
-export interface AdzunaJob {
+export interface Job {
   salary_min: number;
   longitude: number;
-  location: AdzunaLocation;
+  location: JobLocation;
   salary_is_predicted: number;
   description: string;
   created: string;
   latitude: number;
   redirect_url: string;
   title: string;
-  category: AdzunaCategory;
+  category: JobCategory;
   id: string;
   salary_max: number;
-  company: AdzunaCompany;
+  company: JobCompany;
   contract_type: string;
 }
 

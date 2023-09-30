@@ -1,21 +1,21 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { AdzunaService } from './adzuna.service';
-import { AdzunaJob } from './types/adzuna.interface';
+import { JobService } from './job.service';
+import { Job } from './types/job.interface';
 
 @Controller('api/v1')
-export class AdzunaController {
-  constructor(private readonly adzunaService: AdzunaService) {}
+export class JobController {
+  constructor(private readonly jobService: JobService) {}
 
   @Get('/jobs')
   async getJobs(
     @Query() query: { results_per_page: number; what: string; where: string },
-  ): Promise<AdzunaJob[]> {
+  ): Promise<Job[]> {
     const { results_per_page, what, where } = query;
 
     const encodedWhat = encodeURIComponent(what);
     const encodedWhere = encodeURIComponent(where);
 
-    return this.adzunaService.getJobs({
+    return this.jobService.getJobs({
       results_per_page: results_per_page,
       what: encodedWhat,
       where: encodedWhere,
@@ -23,9 +23,9 @@ export class AdzunaController {
   }
 
   @Get('/jobs/:id')
-  async getJob(@Query() query: { id: string }): Promise<AdzunaJob> {
+  async getJob(@Query() query: { id: string }): Promise<Job> {
     const { id } = query;
 
-    return this.adzunaService.getJob(id);
+    return this.jobService.getJob(id);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { AdzunaJob } from './types/adzuna.interface';
+import { Job } from './types/job.interface';
 import { Logger } from '@nestjs/common';
 
 interface getJobsParams {
@@ -11,22 +11,22 @@ interface getJobsParams {
 }
 
 @Injectable()
-export class AdzunaService {
+export class JobService {
   constructor(private configService: ConfigService) {}
 
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
   app_key = this.configService.get<string>('ADZUNA_API_KEY');
 
-  async getJobs(params: getJobsParams): Promise<AdzunaJob[]> {
+  async getJobs(params: getJobsParams): Promise<Job[]> {
     const { results_per_page, what, where } = params;
 
     try {
       const apiUrl = `https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=${this.app_id}&app_key=${this.app_key}&results_per_page=${results_per_page}&what=${what}&where=${where}&content-type=application/json`;
 
-      const response = await axios.get<{ results: AdzunaJob[] }>(apiUrl);
+      const response = await axios.get<{ results: Job[] }>(apiUrl);
 
-      const jobListings: AdzunaJob[] = response.data.results;
-      Logger.log(`${jobListings.length} jobs found`, 'AdzunaJobService');
+      const jobListings: Job[] = response.data.results;
+      Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
       return jobListings;
     } catch (error) {
@@ -35,13 +35,13 @@ export class AdzunaService {
     }
   }
 
-  async getJob(id: string): Promise<AdzunaJob> {
+  async getJob(id: string): Promise<Job> {
     // TODO: try catch block to search database of jobs (not Adzuna API, a database for this app)
     try {
       const apiUrl = `https://api.adzuna.com/v1/api/jobs/gb/details/${id}?app_id=${this.app_id}&app_key=${this.app_key}&content-type=application/json`;
-      const response = await axios.get<AdzunaJob>(apiUrl);
-      const jobListing: AdzunaJob = response.data;
-      Logger.log(`Job found`, 'AdzunaJobService');
+      const response = await axios.get<Job>(apiUrl);
+      const jobListing: Job = response.data;
+      Logger.log(`Job found`, 'JobService');
       return jobListing;
     } catch (error) {
       Logger.error(`~ ${error.message}`);

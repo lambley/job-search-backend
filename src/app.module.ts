@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { config } from '../config/configuration';
-import { AdzunaService } from './adzuna/adzuna.service';
-import { AdzunaModule } from './adzuna/adzuna.module';
+import { JobService } from './job/job.service';
+import { JobModule } from './job/job.module';
 
 @Module({
   imports: [
@@ -11,8 +11,8 @@ import { AdzunaModule } from './adzuna/adzuna.module';
       load: [config],
       isGlobal: true,
     }),
-    AdzunaModule,
+    JobModule,
   ],
-  providers: [AdzunaService],
+  providers: [JobService],
 })
 export class AppModule {}
