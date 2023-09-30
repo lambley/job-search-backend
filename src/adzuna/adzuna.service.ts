@@ -29,8 +29,8 @@ export class AdzunaService {
 
       return jobListings;
     } catch (error) {
-      console.error('error:', error.message);
-      Logger.log(`~ ${error.message}`);
+      Logger.error(`~ ${error.message}`);
+      return [];
     }
   }
 }

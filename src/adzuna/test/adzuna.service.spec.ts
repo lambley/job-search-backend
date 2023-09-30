@@ -3,6 +3,7 @@ import { AdzunaService } from '../adzuna.service';
 import { ConfigService } from '@nestjs/config';
 import { AdzunaJob } from '../types/adzuna.interface';
 import axios from 'axios';
+import { Logger } from '@nestjs/common';
 
 jest.mock('axios');
 
@@ -39,6 +40,12 @@ const adzunaResultsFactory = (count: number): AdzunaJob[] => {
   return results;
 };
 
+const params = {
+  results_per_page: 10,
+  what: 'developer',
+  where: 'london',
+};
+
 describe('AdzunaService', () => {
   let service: AdzunaService;
 
@@ -62,13 +69,46 @@ describe('AdzunaService', () => {
     };
     (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
-    const result = await service.getJobs({
-      results_per_page: 5,
-      what: 'javascript developer',
-      where: 'london',
-    });
+    const result = await service.getJobs(params);
 
     expect(result).toBeInstanceOf(Array);
     expect(result.length).toEqual(5);
+  });
+
+  it('should log the number of jobs found', async () => {
+    const mockResponse = {
+      data: {
+        results: adzunaResultsFactory(5),
+      },
+    };
+    (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+
+    const loggerSpy = jest.spyOn(Logger, 'log');
+
+    const result = await service.getJobs(params);
+
+    expect(result).toBeInstanceOf(Array);
+    expect(result.length).toEqual(5);
+
+    expect(loggerSpy).toHaveBeenCalledWith(
+      `${result.length} jobs found`,
+      'AdzunaJobService',
+    );
+  });
+
+  it('should log an error message if the API call fails', async () => {
+    (axios.get as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+    const loggerSpy = jest.spyOn(Logger, 'error');
+
+    const result = await service.getJobs(params);
+
+    console.log('result:', result);
+    console.log('loggerSpy.mock.calls:', loggerSpy.mock.calls);
+
+    expect(result).toBeInstanceOf(Array);
+    expect(result.length).toEqual(0);
+
+    expect(loggerSpy).toHaveBeenCalledWith(`~ API Error`);
   });
 });
