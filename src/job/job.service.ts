@@ -7,6 +7,7 @@ import {
   JobDbResponse,
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
 
 interface getJobsParams {
   results_per_page: number;
@@ -15,8 +16,12 @@ interface getJobsParams {
 }
 
 @Injectable()
+// url: /api/v1/jobs?results_per_page=[number]&what=[string]&where=[string]
 export class JobService {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService,
+  ) {}
 
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
   app_key = this.configService.get<string>('ADZUNA_API_KEY');
@@ -29,9 +34,10 @@ export class JobService {
 
       const response = await axios.get<{ results: JobResponse[] }>(apiUrl);
 
-      const jobListings: Job[] = response.data.results;
+      const jobListings: JobResponse[] = response.data.results;
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
+      // iterate over jobListings and add each job to the database
       jobListings.forEach(async (job: JobResponse) => {
         const {
           id,
@@ -58,6 +64,26 @@ export class JobService {
           contract_type: contract_type || '',
           category: category.label,
         };
+
+        // return if job already exists in database
+        const jobExists = await this.prisma.job.findUnique({
+          where: { adzuna_id: id },
+        });
+
+        if (jobExists) {
+          Logger.log(`${job.title} already exists in database`, 'JobService');
+          return;
+        }
+
+        try {
+          const newJob = await this.prisma.job.create({
+            data: jobData,
+          });
+          Logger.log(`${newJob.title} added to database`, 'JobService');
+        } catch (error) {
+          Logger.error(`~ ${error.message}`);
+        }
+      });
       return jobListings;
     } catch (error) {
       Logger.error(`~ ${error.message}`);
@@ -65,17 +91,33 @@ export class JobService {
     }
   }
 
-  async getJob(id: string): Promise<Job> {
-    // TODO: try catch block to search database of jobs (not Adzuna API, a database for this app)
+  // url: /api/v1/jobs/:id
+  async getJob(id: string): Promise<JobDbResponse> {
     try {
-      const apiUrl = `https://api.adzuna.com/v1/api/jobs/gb/details/${id}?app_id=${this.app_id}&app_key=${this.app_key}&content-type=application/json`;
-      const response = await axios.get<Job>(apiUrl);
-      const jobListing: Job = response.data;
-      Logger.log(`Job found`, 'JobService');
+      const jobListing = await this.prisma.job.findUnique({
+        where: { adzuna_id: id },
+      });
+      Logger.log(
+        `#${jobListing.adzuna_id}: ${jobListing.title} found`,
+        'JobService',
+      );
       return jobListing;
     } catch (error) {
       Logger.error(`~ ${error.message}`);
-      return null;
+      return {
+        id: 0,
+        adzuna_id: '',
+        title: '',
+        location: [],
+        description: '',
+        created: '',
+        company: '',
+        salary_min: 0,
+        salary_max: 0,
+        contract_type: '',
+        category: '',
+        message: `Job with id ${id} not found`,
+      };
     }
   }
 }

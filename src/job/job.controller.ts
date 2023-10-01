@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Param } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
 
@@ -23,9 +23,7 @@ export class JobController {
   }
 
   @Get('/jobs/:id')
-  async getJob(@Query() query: { id: string }): Promise<Job> {
-    const { id } = query;
-
+  async getJob(@Param('id') id: string): Promise<JobDbResponse> {
     return this.jobService.getJob(id);
   }
 }
