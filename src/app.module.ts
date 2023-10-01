@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { config } from '../config/configuration';
-import { JobService } from './job/job.service';
 import { JobModule } from './job/job.module';
+import { PrismaService } from './prisma.service';
+import { JobService } from './job/job.service';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { JobModule } from './job/job.module';
     }),
     JobModule,
   ],
-  providers: [JobService],
+  providers: [JobService, PrismaService],
 })
 export class AppModule {}
