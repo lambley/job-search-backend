@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { JobService } from './job.service';
-import { Job } from './types/job.interface';
+import { JobResponse, JobDbResponse } from './types/job.interface';
 
 @Controller('api/v1')
 export class JobController {
@@ -9,7 +9,7 @@ export class JobController {
   @Get('/jobs')
   async getJobs(
     @Query() query: { results_per_page: number; what: string; where: string },
-  ): Promise<Job[]> {
+  ): Promise<JobResponse[]> {
     const { results_per_page, what, where } = query;
 
     const encodedWhat = encodeURIComponent(what);
