@@ -13,20 +13,16 @@ interface JobCompany {
 }
 
 export interface Job {
-  salary_min: number;
-  longitude: number;
+  id: number;
+  title: string;
   location: JobLocation;
-  salary_is_predicted: number;
   description: string;
   created: string;
-  latitude: number;
-  redirect_url: string;
-  title: string;
-  category: JobCategory;
-  id: string;
-  salary_max: number;
   company: JobCompany;
+  salary_min: number;
+  salary_max: number;
   contract_type: string;
+  category: JobCategory;
 }
 
 // see https://developer.adzuna.com/docs/search for an example response
