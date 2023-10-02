@@ -7,7 +7,7 @@ import {
   JobDbResponse,
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { PrismaJobRepository } from './prisma-job.repository';
 
 interface getJobsParams {
   results_per_page: number;
@@ -20,7 +20,7 @@ interface getJobsParams {
 export class JobService {
   constructor(
     private configService: ConfigService,
-    private prisma: PrismaService,
+    private readonly jobRepository: PrismaJobRepository,
   ) {}
 
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
@@ -49,7 +49,7 @@ export class JobService {
   // url: /api/v1/jobs/:id
   async getJob(id: string): Promise<JobDbResponse> {
     try {
-      const jobListing = await this.prisma.job.findUnique({
+      const jobListing = await this.jobRepository.findByAdzunaId({
         where: { adzuna_id: id },
       });
       Logger.log(
@@ -103,7 +103,7 @@ export class JobService {
         category: category.label,
       };
 
-      const jobExists = await this.prisma.job.findUnique({
+      const jobExists = await this.jobRepository.findByAdzunaId({
         where: { adzuna_id: id },
       });
       if (jobExists) {
@@ -112,8 +112,8 @@ export class JobService {
       }
 
       try {
-        const newJob = await this.prisma.job.create({
-          data: jobData,
+        const newJob = await this.jobRepository.create({
+          ...jobData,
         });
         Logger.log(`${newJob.title} added to database`, 'JobService');
       } catch (error) {
