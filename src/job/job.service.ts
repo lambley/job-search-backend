@@ -37,53 +37,8 @@ export class JobService {
       const jobListings: JobResponse[] = response.data.results;
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
-      // iterate over jobListings and add each job to the database
-      jobListings.forEach(async (job: JobResponse) => {
-        const {
-          id,
-          title,
-          location,
-          description,
-          created,
-          company,
-          salary_min,
-          salary_max,
-          contract_type,
-          category,
-        } = job;
+      await this.saveJobsToDatabase(jobListings);
 
-        const jobData: JobDBCreateRequest = {
-          adzuna_id: id,
-          title,
-          location: location.area,
-          description,
-          created,
-          company: company.display_name,
-          salary_min,
-          salary_max,
-          contract_type: contract_type || '',
-          category: category.label,
-        };
-
-        // return if job already exists in database
-        const jobExists = await this.prisma.job.findUnique({
-          where: { adzuna_id: id },
-        });
-
-        if (jobExists) {
-          Logger.log(`${job.title} already exists in database`, 'JobService');
-          return;
-        }
-
-        try {
-          const newJob = await this.prisma.job.create({
-            data: jobData,
-          });
-          Logger.log(`${newJob.title} added to database`, 'JobService');
-        } catch (error) {
-          Logger.error(`~ ${error.message}`);
-        }
-      });
       return jobListings;
     } catch (error) {
       Logger.error(`~ ${error.message}`);
@@ -118,6 +73,52 @@ export class JobService {
         category: '',
         message: `Job with id ${id} not found`,
       };
+    }
+  }
+  private async saveJobsToDatabase(jobs: JobResponse[]): Promise<void> {
+    for (const job of jobs) {
+      const {
+        id,
+        title,
+        location,
+        description,
+        created,
+        company,
+        salary_min,
+        salary_max,
+        contract_type,
+        category,
+      } = job;
+
+      const jobData: JobDBCreateRequest = {
+        adzuna_id: id,
+        title,
+        location: location.area,
+        description,
+        created,
+        company: company.display_name,
+        salary_min,
+        salary_max,
+        contract_type: contract_type || '',
+        category: category.label,
+      };
+
+      const jobExists = await this.prisma.job.findUnique({
+        where: { adzuna_id: id },
+      });
+      if (jobExists) {
+        Logger.log(`${job.title} already exists in database`, 'JobService');
+        continue;
+      }
+
+      try {
+        const newJob = await this.prisma.job.create({
+          data: jobData,
+        });
+        Logger.log(`${newJob.title} added to database`, 'JobService');
+      } catch (error) {
+        Logger.error(`~ ${error.message}`);
+      }
     }
   }
 }
