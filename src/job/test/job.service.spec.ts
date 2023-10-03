@@ -1,28 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobService } from '../job.service';
 import { ConfigService } from '@nestjs/config';
-import { Job } from '../types/job.interface';
+import { JobResponse } from '../types/job.interface';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
+import { PrismaJobRepository } from '../prisma-job.repository';
 
 jest.mock('axios');
 
-const jobResultsFactory = (count: number): Job[] => {
-  const results: Job[] = [];
+const mockPrismaJobRepository = {
+  create: jest.fn(),
+  findById: jest.fn(),
+  findByAdzunaId: jest.fn(),
+  findAll: jest.fn(),
+  updateById: jest.fn(),
+  deleteById: jest.fn(),
+};
+
+const jobResultsFactory = (count: number): JobResponse[] => {
+  const results: JobResponse[] = [];
 
   for (let i = 0; i < count; i++) {
     results.push({
       salary_min: 10000,
-      longitude: 0.0,
       location: {
         area: ['London'],
         display_name: 'London',
       },
-      salary_is_predicted: 0,
       description: 'A job description',
       created: '2021-01-01T00:00:00Z',
-      latitude: 0.0,
-      redirect_url: 'https://www.example.com',
       title: 'Job Title',
       category: {
         label: 'IT Jobs',
@@ -51,10 +57,15 @@ describe('JobService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [JobService, ConfigService],
-    }).compile();
+      providers: [JobService, ConfigService, PrismaJobRepository],
+    })
+      .overrideProvider(PrismaJobRepository)
+      .useValue(mockPrismaJobRepository)
+      .compile();
 
     service = module.get<JobService>(JobService);
+
+    jest.clearAllMocks();
   });
 
   describe('getJobs', () => {
@@ -92,7 +103,7 @@ describe('JobService', () => {
       expect(result.length).toEqual(5);
 
       expect(loggerSpy).toHaveBeenCalledWith(
-        `${result.length} jobs found`,
+        `${result.length} job(s) found`,
         'JobService',
       );
     });
@@ -103,9 +114,6 @@ describe('JobService', () => {
       const loggerSpy = jest.spyOn(Logger, 'error');
 
       const result = await service.getJobs(params);
-
-      console.log('result:', result);
-      console.log('loggerSpy.mock.calls:', loggerSpy.mock.calls);
 
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toEqual(0);
@@ -120,27 +128,26 @@ describe('JobService', () => {
     });
 
     it('should return a job', async () => {
-      const mockResponse = {
+      const mockDbResponse = {
         data: jobResultsFactory(1)[0],
       };
-      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+      mockPrismaJobRepository.findByAdzunaId.mockResolvedValue(mockDbResponse);
 
-      const result = await service.getJob('1234567890');
+      await service.getJob('1234567890');
 
-      expect(result).toBeInstanceOf(Object);
-      expect(result.id).toEqual('1234567890');
+      expect(mockPrismaJobRepository.findByAdzunaId).toHaveBeenCalledWith({
+        where: { adzuna_id: '1234567890' },
+      });
+      expect(mockPrismaJobRepository.findByAdzunaId).toHaveBeenCalledTimes(1);
     });
 
     it('should log an error message if the API call fails', async () => {
-      (axios.get as jest.Mock).mockRejectedValue(new Error('API Error'));
+      mockPrismaJobRepository.findByAdzunaId.mockRejectedValue(
+        new Error('Database Error'),
+      );
+      const result = await service.getJob('1');
 
-      const loggerSpy = jest.spyOn(Logger, 'error');
-
-      const result = await service.getJob('1234567890');
-
-      expect(result).toBeNull();
-
-      expect(loggerSpy).toHaveBeenCalledWith(`~ API Error`);
+      expect(result.message).toEqual('Job with id 1 not found');
     });
   });
 });
