@@ -8,7 +8,6 @@ import { JobProcessorService } from '../job-processor/job-processor.service';
   imports: [BullModule.registerQueue({ name: 'jobQueue' })],
   providers: [JobConsumerService],
 })
-
 // Processor for the job queue - running the job processor service
 @Processor('jobQueue') // Specify the queue name
 export class JobConsumerProcessor {

@@ -33,6 +33,7 @@
     "@prisma/client": "^5.3.1",
     "axios": "^1.5.1",
     "bull": "^4.11.3",
+    "natural": "^6.7.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
