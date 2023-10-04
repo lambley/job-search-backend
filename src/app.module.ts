@@ -6,6 +6,7 @@ import { JobModule } from './job/job.module';
 import { PrismaService } from './prisma.service';
 import { JobService } from './job/job.service';
 import { PrismaJobRepository } from './job/prisma-job.repository';
+import { JobProcessorModule } from './job-processor/job-processor.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PrismaJobRepository } from './job/prisma-job.repository';
       },
     }),
     JobModule,
+    JobProcessorModule,
   ],
   providers: [JobService, PrismaService, PrismaJobRepository],
 })
