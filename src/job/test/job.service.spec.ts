@@ -5,17 +5,9 @@ import { jobResultsFactory } from './factories/jobFactory';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from '../prisma-job.repository';
+import { mockPrismaJobRepository } from './mocks/mockPrismaRepository';
 
 jest.mock('axios');
-
-const mockPrismaJobRepository = {
-  create: jest.fn(),
-  findById: jest.fn(),
-  findByAdzunaId: jest.fn(),
-  findAll: jest.fn(),
-  updateById: jest.fn(),
-  deleteById: jest.fn(),
-};
 
 const params = {
   results_per_page: 10,
