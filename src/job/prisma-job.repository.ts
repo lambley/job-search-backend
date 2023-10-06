@@ -46,4 +46,12 @@ export class PrismaJobRepository implements JobRepository {
       where: { id: parseInt(id) },
     });
   }
+
+  async getKeywords(id: string): Promise<string[]> {
+    const job = await this.prisma.job.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    return job.processed_keywords || [];
+  }
 }

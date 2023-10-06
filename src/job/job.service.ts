@@ -75,6 +75,23 @@ export class JobService {
       };
     }
   }
+
+  // url: /api/v1/jobs/:id/keywords
+  async getJobKeywords(id: string): Promise<string[]> {
+    try {
+      const jobListing: JobDbResponse = await this.jobRepository.findById(id);
+
+      Logger.log(
+        `#${jobListing.adzuna_id}: ${jobListing.title} found`,
+        'JobService',
+      );
+      return jobListing.processed_keywords;
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+      return [];
+    }
+  }
+
   private async saveJobsToDatabase(jobs: JobResponse[]): Promise<void> {
     for (const job of jobs) {
       const {

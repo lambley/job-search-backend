@@ -44,6 +44,7 @@ const jobResultFactory = (): JobDbResponse => {
     salary_max: 100000,
     contract_type: 'full-time',
     category: 'IT Jobs',
+    processed_keywords: ['keyword1', 'keyword2'],
   };
 };
 

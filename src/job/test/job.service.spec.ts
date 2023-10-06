@@ -99,12 +99,16 @@ describe('JobService', () => {
       };
       mockPrismaJobRepository.findByAdzunaId.mockResolvedValue(mockDbResponse);
 
-      await service.getJob('1234567890');
+      const result = await service.getJob('1234567890');
 
       expect(mockPrismaJobRepository.findByAdzunaId).toHaveBeenCalledWith({
         where: { adzuna_id: '1234567890' },
       });
       expect(mockPrismaJobRepository.findByAdzunaId).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeInstanceOf(Object);
+      expect(result['data']).toHaveProperty('id');
+      expect(result['data']['id']).toEqual(1);
     });
 
     it('should log an error message if the API call fails', async () => {
@@ -114,6 +118,26 @@ describe('JobService', () => {
       const result = await service.getJob('1');
 
       expect(result.message).toEqual('Job with id 1 not found');
+    });
+  });
+
+  describe('getJobKeywords', () => {
+    it('should be defined', () => {
+      expect(service.getJobKeywords).toBeDefined();
+    });
+
+    it('should return an array of keywords', async () => {
+      const mockDbResponse = jobResultFactory();
+
+      mockPrismaJobRepository.findById.mockResolvedValue(mockDbResponse);
+
+      const result = await service.getJobKeywords('1');
+
+      expect(mockPrismaJobRepository.findById).toHaveBeenCalledWith('1');
+      expect(mockPrismaJobRepository.findById).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(2);
     });
   });
 });

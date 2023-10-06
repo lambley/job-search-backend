@@ -30,6 +30,10 @@ export class JobController {
   async getJob(@Param('adzuna_id') adzuna_id: string): Promise<JobDbResponse> {
     return this.jobService.getJob(adzuna_id);
   }
+
+  @Get('/jobs/:id/keywords')
+  async getJobKeywords(@Param('id') id: string): Promise<string[]> {
+    return this.jobService.getJobKeywords(id);
   }
 
   @Post('process')
