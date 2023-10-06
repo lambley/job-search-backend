@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
 import { JobProcessorService } from './job-processor.service';
 
-@Module({})
-export class JobProcessorModule {
-  providers: [JobProcessorService];
-  exports: [JobProcessorService];
-}
+@Module({
+  imports: [
+    BullModule.registerQueue({
+      name: 'jobQueue',
+    }),
+  ],
+  providers: [JobProcessorService],
+  exports: [JobProcessorService],
+})
+export class JobProcessorModule {}
