@@ -1,15 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
+import { Processor, Process } from '@nestjs/bull';
 import { JobProcessorService } from '../job-processor/job-processor.service';
 import { JobResponse } from 'src/job/types/job.interface';
 
-@Injectable()
-export class JobConsumerService {
+@Processor('jobQueue')
+export class JobConsumerProcessor {
   constructor(private readonly jobProcessorService: JobProcessorService) {}
 
-  async processJob(job: { data: JobResponse }) {
+  @Process('processJob')
+  async handleProcessJob(job: { data: JobResponse }) {
     const jobData = job.data;
-    Logger.log(`Processing job ${jobData.id}`);
     await this.jobProcessorService.processJobDescription(jobData.description);
   }
 }
