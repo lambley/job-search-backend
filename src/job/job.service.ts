@@ -47,10 +47,10 @@ export class JobService {
   }
 
   // url: /api/v1/jobs/:id
-  async getJob(id: string): Promise<JobDbResponse> {
+  async getJob(adzuna_id: string): Promise<JobDbResponse> {
     try {
       const jobListing = await this.jobRepository.findByAdzunaId({
-        where: { adzuna_id: id },
+        where: { adzuna_id: adzuna_id },
       });
       Logger.log(
         `#${jobListing.adzuna_id}: ${jobListing.title} found`,
@@ -71,7 +71,7 @@ export class JobService {
         salary_max: 0,
         contract_type: '',
         category: '',
-        message: `Job with id ${id} not found`,
+        message: `Job with id ${adzuna_id} not found`,
       };
     }
   }
