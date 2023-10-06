@@ -9,6 +9,6 @@ import { JobProcessorService } from './job-processor.service';
     }),
   ],
   providers: [JobProcessorService],
-  exports: [JobProcessorService],
+  exports: [JobProcessorService, BullModule],
 })
 export class JobProcessorModule {}

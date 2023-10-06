@@ -8,6 +8,8 @@ import {
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from './prisma-job.repository';
+import { InjectQueue } from '@nestjs/bull'; // Import InjectQueue
+import { Queue } from 'bull'; // Import Queue
 
 interface getJobsParams {
   results_per_page: number;
@@ -21,6 +23,7 @@ export class JobService {
   constructor(
     private configService: ConfigService,
     private readonly jobRepository: PrismaJobRepository,
+    @InjectQueue('jobQueue') private readonly jobQueue: Queue,
   ) {}
 
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
@@ -133,6 +136,11 @@ export class JobService {
           ...jobData,
         });
         Logger.log(`${newJob.title} added to database`, 'JobService');
+
+        // Add the job description to the processing queue
+        await this.jobQueue.add('processJob', {
+          description: newJob.description,
+        });
       } catch (error) {
         Logger.error(`~ ${error.message}`);
       }
