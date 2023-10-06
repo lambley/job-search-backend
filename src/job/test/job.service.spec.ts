@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobService } from '../job.service';
 import { ConfigService } from '@nestjs/config';
-import { jobResultsFactory } from './factories/jobFactory';
+import {
+  jobResultArrayFactory,
+  jobResultFactory,
+} from './factories/jobFactory';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from '../prisma-job.repository';
@@ -39,7 +42,7 @@ describe('JobService', () => {
     it('should return an array of jobs', async () => {
       const mockResponse = {
         data: {
-          results: jobResultsFactory(5),
+          results: jobResultArrayFactory(5),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -53,7 +56,7 @@ describe('JobService', () => {
     it('should log the number of jobs found', async () => {
       const mockResponse = {
         data: {
-          results: jobResultsFactory(5),
+          results: jobResultArrayFactory(5),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -92,7 +95,7 @@ describe('JobService', () => {
 
     it('should return a job', async () => {
       const mockDbResponse = {
-        data: jobResultsFactory(1)[0],
+        data: jobResultFactory(),
       };
       mockPrismaJobRepository.findByAdzunaId.mockResolvedValue(mockDbResponse);
 

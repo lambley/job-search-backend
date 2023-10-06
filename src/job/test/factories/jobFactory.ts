@@ -1,7 +1,7 @@
 import { JobResponse, JobDbResponse } from 'src/job/types/job.interface';
 
 // for getJobs - returns an array of job responses
-const jobResultsFactory = (count: number): JobResponse[] => {
+const jobResultArrayFactory = (count: number): JobResponse[] => {
   const results: JobResponse[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -47,4 +47,4 @@ const jobResultFactory = (): JobDbResponse => {
   };
 };
 
-export { jobResultsFactory, jobResultFactory };
+export { jobResultArrayFactory, jobResultFactory };

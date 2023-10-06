@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobController } from '../job.controller';
 import { JobService } from '../job.service';
 import { JobProcessorService } from '../../job-processor/job-processor.service';
-import { jobResultsFactory, jobResultFactory } from './factories/jobFactory';
+import {
+  jobResultArrayFactory,
+  jobResultFactory,
+} from './factories/jobFactory';
 import { ConfigService } from '@nestjs/config';
 import { PrismaJobRepository } from '../prisma-job.repository';
 import { mockPrismaJobRepository } from './mocks/mockPrismaRepository';
@@ -38,7 +41,7 @@ describe('JobController', () => {
         what: 'keyword',
         where: 'location',
       };
-      const expectedResponse = jobResultsFactory(10);
+      const expectedResponse = jobResultArrayFactory(10);
 
       jest.spyOn(jobService, 'getJobs').mockResolvedValue(expectedResponse);
 
