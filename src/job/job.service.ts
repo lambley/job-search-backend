@@ -8,8 +8,8 @@ import {
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from './prisma-job.repository';
-import { InjectQueue } from '@nestjs/bull'; // Import InjectQueue
-import { Queue } from 'bull'; // Import Queue
+import { InjectQueue } from '@nestjs/bull'; 
+import { Queue } from 'bull';
 
 interface getJobsParams {
   results_per_page: number;
@@ -138,9 +138,17 @@ export class JobService {
         Logger.log(`${newJob.title} added to database`, 'JobService');
 
         // Add the job description to the processing queue
-        await this.jobQueue.add('processJob', {
-          description: newJob.description,
-        });
+        try {
+          await this.jobQueue.add('processJob', {
+            description: newJob.description,
+          });
+          Logger.log(
+            `Added job ${newJob.title} to the processing queue`,
+            'JobService',
+          );
+        } catch (error) {
+          Logger.error(`~ ${error.message}`);
+        }
       } catch (error) {
         Logger.error(`~ ${error.message}`);
       }

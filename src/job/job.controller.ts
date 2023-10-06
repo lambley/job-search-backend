@@ -36,9 +36,9 @@ export class JobController {
     return this.jobService.getJobKeywords(id);
   }
 
-  @Post('process')
-  async processJob(@Body() jobData: { description: string }): Promise<void> {
-    // Add the job description to the processing queue
-    await this.jobProcessorService.processJobDescription(jobData.description);
-  }
+  // @Post('process')
+  // async processJob(@Body() jobData: { description: string }): Promise<void> {
+  //   // Add the job description to the processing queue
+  //   await this.jobProcessorService.processJobDescription(jobData.description);
+  // }
 }
