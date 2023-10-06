@@ -2,18 +2,27 @@ import { Injectable } from '@nestjs/common';
 import { WordTokenizer } from 'natural/lib/natural/tokenizers';
 import { words as StopWords } from 'natural/lib/natural/util/stopwords';
 import { Logger } from '@nestjs/common';
+import { ProcessJobData } from 'src/types/job-process-data';
+import { PrismaJobRepository } from '../job/prisma-job.repository';
 
 @Injectable()
 export class JobProcessorService {
-  async processJobDescription(jobDescription: string): Promise<string[]> {
-    const shortDescription = jobDescription.slice(0, 20) || '';
+  constructor(private readonly jobRepository: PrismaJobRepository) {}
 
-    Logger.log(`Processing job ${shortDescription}`, 'JobProcessorService');
+  async processJobDescription({
+    description,
+    id,
+    adzuna_id,
+  }: ProcessJobData): Promise<string[]> {
+    Logger.log(
+      `Processing job id #${id} | adzuna_id #${adzuna_id}`,
+      'JobProcessorService',
+    );
     try {
       const processed_keywords =
-        this.processJobDescriptionWithNatural(jobDescription);
+        this.processJobDescriptionWithNatural(description);
       Logger.log(
-        `Processed ${processed_keywords.length} keywords`,
+        `Processed ${processed_keywords.length} keywords for id #${id} | adzuna_id #${adzuna_id}`,
         'JobProcessorService',
       );
       return processed_keywords;
@@ -38,5 +47,21 @@ export class JobProcessorService {
 
     const uniqueWords = Array.from(uniqueWordsSet);
     return uniqueWords;
+  }
+
+  async saveKeywordsToDatabase(id: string, keywords: string[]): Promise<void> {
+    Logger.log(
+      `Saving ${keywords.length} keywords to database`,
+      'JobProcessorService',
+    );
+    try {
+      await this.jobRepository.saveKeywords(id, keywords);
+      Logger.log(
+        `Saved ${keywords.length} keywords to database for id #${id}`,
+        'JobProcessorService',
+      );
+    } catch (error) {
+      Logger.error(`~ ${error.message}`, 'JobProcessorService');
+    }
   }
 }

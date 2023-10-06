@@ -14,4 +14,5 @@ export interface JobRepository {
   updateById(id: string, data: Partial<Job>): Promise<Job | null>;
   deleteById(id: string): Promise<Job | null>;
   getKeywords(id: string): Promise<string[]>;
+  saveKeywords(id: string, keywords: string[]): Promise<void>;
 }

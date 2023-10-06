@@ -1,12 +1,15 @@
 import { Processor, Process } from '@nestjs/bull';
 import { JobProcessorService } from '../job-processor/job-processor.service';
 import { Logger } from '@nestjs/common';
+import { ProcessJobData } from 'src/types/job-process-data';
 
 // redis queue job data interface
 interface QueueJobData {
   name: string;
   data: {
     description: string;
+    id: string;
+    adzuna_id: string;
   };
   opts: {
     attempts: number;
@@ -24,15 +27,16 @@ export class JobConsumerProcessor {
 
   @Process('processJob')
   async handleProcessJob(data: QueueJobData) {
-    const name = data.name || '';
-    const shortName = name.slice(0, 10) || '';
-    const description = data.data.description || '';
-    const shortDescription = description.slice(0, 20) || '';
-
+    const { description, id, adzuna_id } = data.data;
     Logger.log(
-      `Processing job ${shortName} - ${shortDescription}`,
+      `Processing job id #${id} | adzuna_id #${adzuna_id}`,
       'JobConsumerProcessor',
     );
-    await this.jobProcessorService.processJobDescription(description);
+    const keywords = await this.jobProcessorService.processJobDescription({
+      description,
+      id,
+      adzuna_id,
+    });
+    this.jobProcessorService.saveKeywordsToDatabase(id, keywords);
   }
 }

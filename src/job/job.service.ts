@@ -8,7 +8,7 @@ import {
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from './prisma-job.repository';
-import { InjectQueue } from '@nestjs/bull'; 
+import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 
 interface getJobsParams {
@@ -141,6 +141,8 @@ export class JobService {
         try {
           await this.jobQueue.add('processJob', {
             description: newJob.description,
+            id: newJob.id,
+            adzuna_id: newJob.adzuna_id,
           });
           Logger.log(
             `Added job ${newJob.title} to the processing queue`,

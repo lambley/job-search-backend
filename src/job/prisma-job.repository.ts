@@ -54,4 +54,15 @@ export class PrismaJobRepository implements JobRepository {
 
     return job.processed_keywords || [];
   }
+
+  async saveKeywords(id: string, keywords: string[]): Promise<void> {
+    await this.prisma.job.update({
+      where: { id: parseInt(id) },
+      data: {
+        processed_keywords: {
+          set: keywords,
+        },
+      },
+    });
+  }
 }
