@@ -12,15 +12,16 @@ generator client {
 }
 
 model Job {
-  id            Int    @id @default(autoincrement())
-  adzuna_id     String    @unique
-  title         String
-  location      String[]
-  description   String
-  created       String
-  company       String
-  salary_min    Float
-  salary_max    Float
-  contract_type String?
-  category      String
+  id                 Int      @id @default(autoincrement())
+  adzuna_id          String   @unique
+  title              String
+  location           String[]
+  description        String
+  created            String
+  company            String
+  salary_min         Float
+  salary_max         Float
+  contract_type      String?
+  category           String
+  processed_keywords String[]
 }

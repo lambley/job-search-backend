@@ -54,6 +54,7 @@ export interface JobDbResponse {
   // label string of JobResponse.category.label
   category: string;
   message?: string;
+  processed_keywords?: string[];
 }
 
 // see https://developer.adzuna.com/docs/search for an example response
