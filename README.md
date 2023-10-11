@@ -17,19 +17,35 @@ Keywords can be generated based on historical job listings for a given job title
 
 To run the app locally, you will need to install NestJS:
 
-```bash
-$ npm install -g @nestjs/cli
+```zsh
+npm install -g @nestjs/cli
 ```
+
+Install Redis:
+
+```zsh
+sudo apt install redis-server
+```
+
 
 ## Running the app
 
-```bash
-# development
-$ npm run start
-
-# running tests
-$ npm run test --watch
+Start the redis server and monitor:
+```zsh
+sudo service redis-server start
+redis-cli monitor
 ```
+
+Start the app (development mode):
+```zsh
+npm run start:dev
+
+# or
+
+nest start --watch
+
+```
+
 
 ## Endpoints
 
