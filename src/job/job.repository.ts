@@ -15,4 +15,5 @@ export interface JobRepository {
   deleteById(id: string): Promise<Job | null>;
   getKeywords(id: string): Promise<string[]>;
   saveKeywords(id: string, keywords: string[]): Promise<void>;
+  findByTitle(title: string): Promise<Job[]>;
 }

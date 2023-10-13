@@ -95,6 +95,18 @@ export class JobService {
     }
   }
 
+  // url: /api/v1/jobs?title=[string]
+  async getJobsByTitle(title: string): Promise<JobDbResponse[]> {
+    try {
+      const jobListings = await this.jobRepository.findByTitle(title);
+      Logger.log(`${jobListings.length} job(s) found`, 'JobService');
+      return jobListings;
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+      return [];
+    }
+  }
+
   private async saveJobsToDatabase(jobs: JobResponse[]): Promise<void> {
     for (const job of jobs) {
       const {

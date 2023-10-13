@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
 import { JobProcessorService } from '../job-processor/job-processor.service';
@@ -26,6 +26,13 @@ export class JobController {
     });
   }
 
+  @Get('/jobs/title')
+  async getJobsByTitle(
+    @Query('title') title: string,
+  ): Promise<JobDbResponse[]> {
+    return this.jobService.getJobsByTitle(title);
+  }
+
   @Get('/jobs/:adzuna_id')
   async getJob(@Param('adzuna_id') adzuna_id: string): Promise<JobDbResponse> {
     return this.jobService.getJob(adzuna_id);
@@ -35,10 +42,4 @@ export class JobController {
   async getJobKeywords(@Param('id') id: string): Promise<string[]> {
     return this.jobService.getJobKeywords(id);
   }
-
-  // @Post('process')
-  // async processJob(@Body() jobData: { description: string }): Promise<void> {
-  //   // Add the job description to the processing queue
-  //   await this.jobProcessorService.processJobDescription(jobData.description);
-  // }
 }

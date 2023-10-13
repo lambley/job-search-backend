@@ -65,4 +65,17 @@ export class PrismaJobRepository implements JobRepository {
       },
     });
   }
+
+  async findByTitle(title: string): Promise<Job[]> {
+    const jobs = await this.prisma.job.findMany({
+      where: {
+        title: {
+          contains: title,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    return jobs;
+  }
 }
