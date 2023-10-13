@@ -2,6 +2,7 @@ import { Controller, Get, Query, Param } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
 import { JobProcessorService } from '../job-processor/job-processor.service';
+import { ResponseDTO } from './dto/response.dto';
 
 @Controller('api/v1')
 export class JobController {
@@ -13,17 +14,23 @@ export class JobController {
   @Get('/jobs')
   async getJobs(
     @Query() query: { results_per_page: number; what: string; where: string },
-  ): Promise<JobResponse[]> {
+  ): Promise<ResponseDTO<JobResponse>> {
     const { results_per_page, what, where } = query;
 
     const encodedWhat = encodeURIComponent(what);
     const encodedWhere = encodeURIComponent(where);
 
-    return this.jobService.getJobs({
+    const jobs = await this.jobService.getJobs({
       results_per_page: results_per_page,
       what: encodedWhat,
       where: encodedWhere,
     });
+
+    const count = jobs.length;
+
+    const response = new ResponseDTO(jobs, count);
+
+    return response;
   }
 
   @Get('/jobs/title')
