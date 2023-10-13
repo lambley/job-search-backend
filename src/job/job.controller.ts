@@ -36,8 +36,12 @@ export class JobController {
   @Get('/jobs/title')
   async getJobsByTitle(
     @Query('title') title: string,
-  ): Promise<JobDbResponse[]> {
-    return this.jobService.getJobsByTitle(title);
+  ): Promise<ResponseDTO<JobDbResponse>> {
+    const jobs = await this.jobService.getJobsByTitle(title);
+    const count = jobs.length;
+
+    const response = new ResponseDTO(jobs, count);
+    return response;
   }
 
   @Get('/jobs/:adzuna_id')
@@ -46,7 +50,11 @@ export class JobController {
   }
 
   @Get('/jobs/:id/keywords')
-  async getJobKeywords(@Param('id') id: string): Promise<string[]> {
-    return this.jobService.getJobKeywords(id);
+  async getJobKeywords(@Param('id') id: string): Promise<ResponseDTO<string>> {
+    const keywords = await this.jobService.getJobKeywords(id);
+    const count = keywords.length;
+
+    const response = new ResponseDTO(keywords, count);
+    return response;
   }
 }
