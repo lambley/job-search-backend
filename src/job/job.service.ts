@@ -10,6 +10,7 @@ import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from './prisma-job.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import * as NodeCache from 'node-cache';
 
 interface getJobsParams {
   results_per_page: number;
@@ -26,11 +27,23 @@ export class JobService {
     @InjectQueue('jobQueue') private readonly jobQueue: Queue,
   ) {}
 
+  // Create a cache to store the job listings for 1 hour to reduce the number of API calls
+  cache = new NodeCache({ stdTTL: 3600 });
+
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
   app_key = this.configService.get<string>('ADZUNA_API_KEY');
 
   async getJobs(params: getJobsParams): Promise<JobResponse[]> {
     const { results_per_page, what, where } = params;
+    const cacheKey = `${results_per_page}-${what}-${where}`;
+
+    // check if the cache already has the job listings
+    const cachedJobs = this.cache.get(cacheKey);
+
+    if (cachedJobs) {
+      Logger.log(`Retrieved jobs from cache`, 'JobService');
+      return cachedJobs as JobResponse[];
+    }
 
     try {
       const apiUrl = `https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=${this.app_id}&app_key=${this.app_key}&results_per_page=${results_per_page}&what=${what}&where=${where}&content-type=application/json`;
@@ -41,6 +54,9 @@ export class JobService {
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
       await this.saveJobsToDatabase(jobListings);
+
+      // store the job listings in the cache
+      this.cache.set(cacheKey, jobListings);
 
       return jobListings;
     } catch (error) {
