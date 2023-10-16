@@ -108,6 +108,41 @@ describe('JobService', () => {
 
       expect(loggerSpy).toHaveBeenCalledWith(`~ API Error`);
     });
+
+    it('should save the jobs to the database', async () => {
+      const mockResponse = {
+        data: {
+          results: jobResultArrayFactory(5),
+        },
+      };
+      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await service.getJobs(params);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(5);
+
+      expect(mockPrismaJobRepository.create).toHaveBeenCalledTimes(5);
+    });
+
+    it('should cache the jobs for 1 hour', async () => {
+      const mockResponse = {
+        data: {
+          results: jobResultArrayFactory(5),
+        },
+      };
+      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await service.getJobs(params);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(5);
+
+      expect(service.cache.set).toHaveBeenCalledWith(
+        '10-developer-london',
+        result,
+      );
+    });
   });
 
   describe('getJob', () => {
