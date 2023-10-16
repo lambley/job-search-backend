@@ -1,8 +1,20 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { JobProcessorService } from '../job-processor.service';
 import { WordTokenizer } from 'natural/lib/natural/tokenizers';
 import { words as StopWords } from 'natural/lib/natural/util/stopwords';
+import { PrismaJobRepository } from '../../job/prisma-job.repository';
+import { PrismaService } from '../../prisma.service';
 
 describe('JobProcessorService', () => {
+  let module: TestingModule;
+
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      providers: [JobProcessorService, PrismaJobRepository, PrismaService],
+    }).compile();
+  });
+
+  // helper function to filter stop words
   const filterStopWords = (words: string): string[] => {
     const wordTokenizer = new WordTokenizer();
     const uniqueWordsSet = new Set<string>();
@@ -21,31 +33,47 @@ describe('JobProcessorService', () => {
     return uniqueWords;
   };
 
+  // example jobs for testing
+  const shortJob = {
+    description: 'This is a job description',
+    id: '1',
+    adzuna_id: '1',
+  };
+
+  const longJob = {
+    description:
+      'This is a longer job description with more words and more stop words',
+    id: '2',
+    adzuna_id: '2',
+  };
+
+  const stopWordsOnlyJob = {
+    description: 'the and',
+    id: '3',
+    adzuna_id: '3',
+  };
+
   it('should be defined', () => {
-    expect(new JobProcessorService()).toBeDefined();
+    expect(module).toBeDefined();
   });
 
   it('should process a job description', async () => {
-    const jobProcessorService = new JobProcessorService();
+    const jobProcessorService =
+      module.get<JobProcessorService>(JobProcessorService);
 
     // simple description test
-    let jobDescription = 'This is a job description';
-    let result =
-      await jobProcessorService.processJobDescription(jobDescription);
-    let expectedResult = filterStopWords(jobDescription);
+    let result = await jobProcessorService.processJobDescription(shortJob);
+    let expectedResult = filterStopWords(shortJob.description);
     expect(result).toEqual(expectedResult);
 
     // longer description test
-    jobDescription =
-      'This is a longer job description with more words and more stop words';
-    result = await jobProcessorService.processJobDescription(jobDescription);
-    expectedResult = filterStopWords(jobDescription);
+    result = await jobProcessorService.processJobDescription(longJob);
+    expectedResult = filterStopWords(longJob.description);
     expect(result).toEqual(expectedResult);
 
     // description with stop words only
-    jobDescription = 'the and';
-    result = await jobProcessorService.processJobDescription(jobDescription);
-    expectedResult = filterStopWords(jobDescription);
+    result = await jobProcessorService.processJobDescription(stopWordsOnlyJob);
+    expectedResult = filterStopWords(stopWordsOnlyJob.description);
     expect(result).toEqual(expectedResult);
   });
 });
