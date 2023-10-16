@@ -8,6 +8,11 @@ import { JobProcessorService } from '../../job-processor/job-processor.service';
 import { PrismaService } from '../../prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { config } from '../../../config/configuration';
+import { getQueueToken } from '@nestjs/bull';
+
+const mockQueue = {
+  add: jest.fn(),
+};
 
 describe('JobModule', () => {
   let module: TestingModule;
@@ -29,6 +34,10 @@ describe('JobModule', () => {
         JobProcessorService,
         PrismaService,
         PrismaJobRepository,
+        {
+          provide: getQueueToken('jobQueue'),
+          useValue: mockQueue,
+        },
       ],
     })
       .overrideProvider(PrismaJobRepository)
@@ -43,6 +52,11 @@ describe('JobModule', () => {
     it('should import the JobProcessorModule', () => {
       const service = module.get<JobProcessorService>(JobProcessorService);
       expect(service).toBeDefined();
+    });
+
+    it('should import the BullModule', () => {
+      const bullQueue = module.get(getQueueToken('jobQueue'));
+      expect(bullQueue).toBeDefined();
     });
   });
 
@@ -63,6 +77,11 @@ describe('JobModule', () => {
 
       const repository = module.get<PrismaJobRepository>(PrismaJobRepository);
       expect(repository).toBeDefined();
+    });
+
+    it('should provide the JobProcessorService', () => {
+      const service = module.get<JobProcessorService>(JobProcessorService);
+      expect(service).toBeDefined();
     });
   });
 
