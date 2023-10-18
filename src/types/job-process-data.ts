@@ -4,4 +4,22 @@ interface ProcessJobData {
   adzuna_id: string;
 }
 
-export { ProcessJobData };
+// redis queue job data interface
+interface QueueJobData {
+  name: string;
+  data: {
+    description: string;
+    id: string;
+    adzuna_id: string;
+  };
+  opts: {
+    attempts: number;
+    delay: number;
+    timestamp: number;
+  };
+  timestamp: number;
+  delay: number;
+  priority: number;
+}
+
+export { ProcessJobData, QueueJobData };
