@@ -11,6 +11,7 @@ Keywords can be generated based on historical job listings for a given job title
 - Bull - a Node library that implements a fast and robust queue system based on Redis
 - Adzuna API - a search engine for job ads used by over 10 million visitors per month that aims to list every job, everywhere
 - [Natural](https://naturalnode.github.io/natural/) - a general natural language facility for nodejs. Tokenizing, stemming, classification, phonetics, tf-idf, WordNet, string similarity, and some inflections are currently supported
+- Node-cache - a simple in-memory caching module for node.js for caching objects based on key-value pairs (used to cache Adzuna API responses and reduce API calls)
 - Jest - a delightful JavaScript Testing Framework with a focus on simplicity
 
 ## Installation
@@ -27,16 +28,17 @@ Install Redis:
 sudo apt install redis-server
 ```
 
-
 ## Running the app
 
 Start the redis server and monitor:
+
 ```zsh
 sudo service redis-server start
 redis-cli monitor
 ```
 
 Start the app (development mode):
+
 ```zsh
 npm run start:dev
 
@@ -45,7 +47,6 @@ npm run start:dev
 nest start --watch
 
 ```
-
 
 ## Endpoints
 
