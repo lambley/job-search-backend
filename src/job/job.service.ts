@@ -55,6 +55,8 @@ export class JobService {
 
       await this.saveJobsToDatabase(jobListings);
 
+      Logger.log(`Saved jobs to database`, 'JobService');
+
       // store the job listings in the cache
       this.cache.set(cacheKey, jobListings);
 
