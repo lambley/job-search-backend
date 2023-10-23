@@ -26,6 +26,16 @@ Install Redis:
 
 ```zsh
 sudo apt install redis-server
+
+# or on Mac
+brew install redis
+```
+
+Migrating the database:
+
+```zsh
+npm prisma:generate
+npm prisma:migration:run
 ```
 
 ## Running the app
@@ -35,6 +45,9 @@ Start the redis server and monitor:
 ```zsh
 sudo service redis-server start
 redis-cli monitor
+
+# or on Mac
+brew services start redis
 ```
 
 Start the app (development mode):
