@@ -169,11 +169,22 @@ export class JobService {
 
         // Add the job description to the processing queue
         try {
-          await this.jobQueue.add('processJob', {
-            description: newJob.description,
-            id: newJob.id,
-            adzuna_id: newJob.adzuna_id,
-          });
+          await this.jobQueue.add(
+            'processJob',
+            {
+              description: newJob.description,
+              id: newJob.id,
+              adzuna_id: newJob.adzuna_id,
+            },
+            {
+              timeout: 10000,
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 1000,
+              },
+            },
+          );
           Logger.log(
             `Added job ${newJob.title} to the processing queue`,
             'JobService',
