@@ -16,11 +16,30 @@ describe('JobConsumerService', () => {
       .compile();
 
     service = module.get<JobConsumerService>(JobConsumerService);
-  })
+  });
 
   describe('processJob', () => {
     it('should be defined', () => {
       expect(service.processJob).toBeDefined();
+    });
+
+    it('should call jobProcessorService.processJobDescription', async () => {
+      const spy = jest.spyOn(
+        service['jobProcessorService'],
+        'processJobDescription',
+      );
+      await service.processJob({
+        description: 'test',
+        id: '1',
+        adzuna_id: 'test',
+      });
+      expect(spy).toHaveBeenCalled();
+
+      expect(spy).toHaveBeenCalledWith({
+        description: 'test',
+        id: '1',
+        adzuna_id: 'test',
+      });
     });
   });
 });
