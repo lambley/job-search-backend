@@ -58,7 +58,16 @@ describe('PrismaJobRepository', () => {
     expect(createdJob).toEqual(mockDbResponseJob);
   });
 
-  it('should find a job by id', async () => {});
+  it('should find a job by id', async () => {
+    const jobSpy = jest
+      .spyOn(service, 'findById')
+      .mockResolvedValue(mockDbResponseJob);
+
+    const foundJob: JobDbResponse = await service.findById('1');
+
+    expect(jobSpy).toHaveBeenCalledTimes(1);
+    expect(foundJob).toEqual(mockDbResponseJob);
+  });
 
   it('should find a job by adzuna_id', async () => {});
 
