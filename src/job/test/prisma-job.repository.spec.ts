@@ -106,5 +106,14 @@ describe('PrismaJobRepository', () => {
     expect(updatedJob).toEqual(mockDbResponseJob);
   });
 
-  it('should get keywords by id', async () => {});
+  it('should delete a job by id', async () => {
+    const jobSpy = jest
+      .spyOn(service, 'deleteById')
+      .mockResolvedValue(mockDbResponseJob);
+
+    const deletedJob: JobDbResponse = await service.deleteById('1');
+
+    expect(jobSpy).toHaveBeenCalledTimes(1);
+    expect(deletedJob).toEqual(mockDbResponseJob);
+  });
 });
