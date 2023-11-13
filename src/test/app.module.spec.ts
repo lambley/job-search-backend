@@ -41,5 +41,20 @@ describe('AppModule', () => {
     });
   });
 
-  describe('AppModule providers', () => {});
+  describe('AppModule providers', () => {
+    it('should provide the JobService', async () => {
+      const jobService = await module.resolve(AppModule);
+      expect(jobService).toBeDefined();
+    });
+
+    it('should provide the PrismaService', async () => {
+      const prismaService = await module.resolve(AppModule);
+      expect(prismaService).toBeDefined();
+    });
+
+    it('should provide the PrismaJobRepository', async () => {
+      const prismaJobRepository = await module.resolve(AppModule);
+      expect(prismaJobRepository).toBeDefined();
+    });
+  });
 });
