@@ -19,7 +19,6 @@ interface getJobsParams {
 }
 
 @Injectable()
-// url: /api/v1/jobs?results_per_page=[number]&what=[string]&where=[string]
 export class JobService {
   constructor(
     private configService: ConfigService,
@@ -33,7 +32,9 @@ export class JobService {
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
   app_key = this.configService.get<string>('ADZUNA_API_KEY');
 
-  async getJobs(params: getJobsParams): Promise<JobResponse[]> {
+  // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
+  // refresh jobs from API
+  async refreshJobs(params: getJobsParams): Promise<JobResponse[]> {
     const { results_per_page, what, where } = params;
     const cacheKey = `${results_per_page}-${what}-${where}`;
 
@@ -56,6 +57,38 @@ export class JobService {
       await this.saveJobsToDatabase(jobListings);
 
       Logger.log(`Saved jobs to database`, 'JobService');
+
+      // store the job listings in the cache
+      this.cache.set(cacheKey, jobListings);
+
+      return jobListings;
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+      return [];
+    }
+  }
+
+  // url: /api/v1/jobs?results_per_page=[number]&what=[string]&where=[string]
+  // getJobs from database
+  async getJobs(params: getJobsParams): Promise<JobDbResponse[]> {
+    const { results_per_page, what, where } = params;
+    const cacheKey = `${results_per_page}-${what}-${where}`;
+
+    // check if the cache already has the job listings
+    const cachedJobs = this.cache.get(cacheKey);
+
+    if (cachedJobs) {
+      Logger.log(`Retrieved jobs from cache`, 'JobService');
+      return cachedJobs as JobDbResponse[];
+    }
+
+    try {
+      const jobListings = await this.jobRepository.findByTitleAndLocation(
+        what,
+        where,
+        results_per_page,
+      );
+      Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
       // store the job listings in the cache
       this.cache.set(cacheKey, jobListings);
@@ -142,8 +175,8 @@ export class JobService {
 
       const jobData: JobDBCreateRequest = {
         adzuna_id: id,
-        title,
-        location: location.area,
+        title: title.toLowerCase(),
+        location: location.area.map((area) => area.toLowerCase()),
         description,
         created,
         company: company.display_name,

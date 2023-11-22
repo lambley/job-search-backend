@@ -11,8 +11,8 @@ export class JobController {
     private readonly jobProcessorService: JobProcessorService,
   ) {}
 
-  @Get('/jobs')
-  async getJobs(
+  @Get('/jobs/refresh')
+  async refreshJobs(
     @Query() query: { results_per_page: number; what: string; where: string },
   ): Promise<ResponseDTO<JobResponse>> {
     const { results_per_page, what, where } = query;
@@ -20,7 +20,7 @@ export class JobController {
     const encodedWhat = encodeURIComponent(what);
     const encodedWhere = encodeURIComponent(where);
 
-    const jobs = await this.jobService.getJobs({
+    const jobs = await this.jobService.refreshJobs({
       results_per_page: results_per_page,
       what: encodedWhat,
       where: encodedWhere,
@@ -29,6 +29,23 @@ export class JobController {
     const count = jobs.length;
 
     const response = new ResponseDTO(jobs, count);
+
+    return response;
+  }
+
+  @Get('/jobs')
+  async getJobs(
+    @Query() query: { results_per_page: number; what: string; where: string },
+  ): Promise<ResponseDTO<JobDbResponse>> {
+    const { results_per_page, what, where } = query;
+
+    const jobs = await this.jobService.getJobs({
+      results_per_page,
+      what,
+      where,
+    });
+
+    const response = new ResponseDTO(jobs, results_per_page);
 
     return response;
   }

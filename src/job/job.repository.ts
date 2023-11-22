@@ -10,6 +10,11 @@ export interface JobRepository {
   create(data: Partial<Job>): Promise<Job>;
   findById(id: string): Promise<Job | null>;
   findByAdzunaId(data: findUniqueArgs): Promise<Job | null>;
+  findByTitleAndLocation(
+    title: string,
+    location: string,
+    take: number,
+  ): Promise<Job[]>;
   findAll(): Promise<Job[]>;
   updateById(id: string, data: Partial<Job>): Promise<Job | null>;
   deleteById(id: string): Promise<Job | null>;

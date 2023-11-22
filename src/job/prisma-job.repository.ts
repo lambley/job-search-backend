@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma.service';
 import { Job } from '@prisma/client';
 import { JobDBCreateRequest } from './types/job.interface';
 import { JobRepository } from './job.repository';
+import { parse } from 'path';
 
 type findUniqueArgs = {
   where: {
@@ -28,6 +29,25 @@ export class PrismaJobRepository implements JobRepository {
 
   async findByAdzunaId(data: findUniqueArgs): Promise<Job | null> {
     return this.prisma.job.findUnique(data);
+  }
+
+  async findByTitleAndLocation(
+    title: string,
+    location: string,
+    take: number,
+  ): Promise<Job[]> {
+    return this.prisma.job.findMany({
+      where: {
+        title: {
+          contains: title.toLowerCase(),
+          mode: 'insensitive',
+        },
+        location: {
+          hasSome: [location.toLowerCase()],
+        },
+      },
+      take: parseInt(take.toString()),
+    });
   }
 
   async findAll(): Promise<Job[]> {
