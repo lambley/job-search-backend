@@ -45,7 +45,7 @@ export class JobController {
       where,
     });
 
-    const response = new ResponseDTO(jobs, results_per_page);
+    const response = new ResponseDTO(jobs, jobs.length);
 
     return response;
   }

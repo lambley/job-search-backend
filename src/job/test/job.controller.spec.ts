@@ -5,6 +5,7 @@ import { JobProcessorService } from '../../job-processor/job-processor.service';
 import {
   jobResultArrayFactory,
   jobResultFactory,
+  jobDbResultsFactory,
 } from './factories/jobFactory';
 import { ConfigService } from '@nestjs/config';
 import { PrismaJobRepository } from '../prisma-job.repository';
@@ -44,7 +45,7 @@ describe('JobController', () => {
     jobProcessorService = module.get<JobProcessorService>(JobProcessorService);
   });
 
-  describe('getJobs', () => {
+  describe('refreshJobs', () => {
     it('should return an array of job responses', async () => {
       const query = {
         results_per_page: 10,
@@ -52,6 +53,40 @@ describe('JobController', () => {
         where: 'location',
       };
       const response = jobResultArrayFactory(10);
+
+      const expectedResponse = new ResponseDTO(response, response.length);
+
+      jest.spyOn(jobService, 'refreshJobs').mockResolvedValue(response);
+
+      const result = await jobController.refreshJobs(query);
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should return a response with a count of 0 if no jobs are found', async () => {
+      const query = {
+        results_per_page: 10,
+        what: 'keyword',
+        where: 'location',
+      };
+      const response = [];
+
+      const expectedResponse = new ResponseDTO(response, response.length);
+
+      jest.spyOn(jobService, 'refreshJobs').mockResolvedValue(response);
+
+      const result = await jobController.refreshJobs(query);
+      expect(result).toEqual(expectedResponse);
+    });
+  });
+
+  describe('getJobs', () => {
+    it('should return an array of job responses', async () => {
+      const query = {
+        results_per_page: 10,
+        what: 'keyword',
+        where: 'location',
+      };
+      const response = jobDbResultsFactory(10);
 
       const expectedResponse = new ResponseDTO(response, response.length);
 
