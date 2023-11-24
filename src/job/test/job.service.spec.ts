@@ -149,6 +149,47 @@ describe('JobService', () => {
     });
   });
 
+  describe('getJobs', () => {
+    it('should get jobs from the cache if available', async () => {
+      const mockCacheResponse = jobResultArrayFactory(params.results_per_page);
+
+      service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+
+      await service.getJobs(params);
+
+      expect(service.cache.get).toHaveBeenCalledWith(
+        `getJobs-${params.results_per_page}-${params.what}-${params.where}`,
+      );
+      expect(service.cache.get).toHaveBeenCalledTimes(1);
+      expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+    });
+
+    it('should fetch jobs from the database if not in the cache', async () => {
+      const mockDbResponse = jobDbResultsFactory(params.results_per_page);
+
+      mockPrismaJobRepository.findByTitleAndLocation.mockResolvedValue(
+        mockDbResponse,
+      );
+
+      const result = await service.getJobs(params);
+
+      expect(
+        mockPrismaJobRepository.findByTitleAndLocation,
+      ).toHaveBeenCalledWith(
+        params.what,
+        params.where,
+        params.results_per_page,
+      );
+
+      expect(
+        mockPrismaJobRepository.findByTitleAndLocation,
+      ).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(params.results_per_page);
+    });
+  });
+
   describe('getJob', () => {
     it('should be defined', () => {
       expect(service.getJob).toBeDefined();
