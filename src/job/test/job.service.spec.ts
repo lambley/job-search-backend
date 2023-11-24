@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   jobResultArrayFactory,
   jobResultFactory,
+  jobDbResultsFactory,
 } from './factories/jobFactory';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
@@ -56,39 +57,39 @@ describe('JobService', () => {
     jest.clearAllMocks();
   });
 
-  describe('getJobs', () => {
+  describe('refreshJobs', () => {
     it('should be defined', () => {
-      expect(service.getJobs).toBeDefined();
+      expect(service.refreshJobs).toBeDefined();
     });
 
     it('should return an array of jobs', async () => {
       const mockResponse = {
         data: {
-          results: jobResultArrayFactory(5),
+          results: jobResultArrayFactory(params.results_per_page),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await service.getJobs(params);
+      const result = await service.refreshJobs(params);
 
       expect(result).toBeInstanceOf(Array);
-      expect(result.length).toEqual(5);
+      expect(result.length).toEqual(params.results_per_page);
     });
 
     it('should log the number of jobs found', async () => {
       const mockResponse = {
         data: {
-          results: jobResultArrayFactory(5),
+          results: jobResultArrayFactory(params.results_per_page),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
       const loggerSpy = jest.spyOn(Logger, 'log');
 
-      const result = await service.getJobs(params);
+      const result = await service.refreshJobs(params);
 
       expect(result).toBeInstanceOf(Array);
-      expect(result.length).toEqual(5);
+      expect(result.length).toEqual(params.results_per_page);
 
       expect(loggerSpy).toHaveBeenCalledWith(
         `${result.length} job(s) found`,
@@ -101,7 +102,7 @@ describe('JobService', () => {
 
       const loggerSpy = jest.spyOn(Logger, 'error');
 
-      const result = await service.getJobs(params);
+      const result = await service.refreshJobs(params);
 
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toEqual(0);
@@ -112,34 +113,37 @@ describe('JobService', () => {
     it('should save the jobs to the database', async () => {
       const mockResponse = {
         data: {
-          results: jobResultArrayFactory(5),
+          results: jobResultArrayFactory(params.results_per_page),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await service.getJobs(params);
+      const result = await service.refreshJobs(params);
 
       expect(result).toBeInstanceOf(Array);
-      expect(result.length).toEqual(5);
+      expect(result.length).toEqual(params.results_per_page);
 
-      expect(mockPrismaJobRepository.create).toHaveBeenCalledTimes(5);
+      expect(mockPrismaJobRepository.create).toHaveBeenCalledTimes(
+        params.results_per_page,
+      );
     });
 
     it('should cache the jobs for 1 hour', async () => {
       const mockResponse = {
         data: {
-          results: jobResultArrayFactory(5),
+          results: jobResultArrayFactory(params.results_per_page),
         },
       };
       (axios.get as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await service.getJobs(params);
+      const result = await service.refreshJobs(params);
 
       expect(result).toBeInstanceOf(Array);
-      expect(result.length).toEqual(5);
+      expect(result.length).toEqual(params.results_per_page);
 
+      // cache key is in the format: results_per_page-what-where
       expect(service.cache.set).toHaveBeenCalledWith(
-        '10-developer-london',
+        `${params.results_per_page}-${params.what}-${params.where}`,
         result,
       );
     });
