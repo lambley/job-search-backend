@@ -72,7 +72,7 @@ export class JobService {
   // getJobs from database
   async getJobs(params: getJobsParams): Promise<JobDbResponse[]> {
     const { results_per_page, what, where } = params;
-    const cacheKey = `${results_per_page}-${what}-${where}`;
+    const cacheKey = `getJobs-${results_per_page}-${what}-${where}`;
 
     // check if the cache already has the job listings
     const cachedJobs = this.cache.get(cacheKey);
