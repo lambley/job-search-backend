@@ -188,6 +188,67 @@ describe('JobService', () => {
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toEqual(params.results_per_page);
     });
+
+    describe('getJobs logging', () => {
+      it('should log the number of jobs found', async () => {
+        const mockDbResponse = jobDbResultsFactory(params.results_per_page);
+
+        mockPrismaJobRepository.findByTitleAndLocation.mockResolvedValue(
+          mockDbResponse,
+        );
+
+        const loggerSpy = jest.spyOn(Logger, 'log');
+
+        const result = await service.getJobs(params);
+
+        expect(
+          mockPrismaJobRepository.findByTitleAndLocation,
+        ).toHaveBeenCalledWith(
+          params.what,
+          params.where,
+          params.results_per_page,
+        );
+
+        expect(
+          mockPrismaJobRepository.findByTitleAndLocation,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(params.results_per_page);
+
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `${result.length} job(s) found`,
+          'JobService',
+        );
+      });
+
+      it('should log an error message if the database call fails', async () => {
+        mockPrismaJobRepository.findByTitleAndLocation.mockRejectedValue(
+          new Error('Database Error'),
+        );
+
+        const loggerSpy = jest.spyOn(Logger, 'error');
+
+        const result = await service.getJobs(params);
+
+        expect(
+          mockPrismaJobRepository.findByTitleAndLocation,
+        ).toHaveBeenCalledWith(
+          params.what,
+          params.where,
+          params.results_per_page,
+        );
+
+        expect(
+          mockPrismaJobRepository.findByTitleAndLocation,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(0);
+
+        expect(loggerSpy).toHaveBeenCalledWith(`~ Database Error`);
+      });
+    });
   });
 
   describe('getJob', () => {
