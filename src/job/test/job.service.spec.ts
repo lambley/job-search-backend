@@ -282,6 +282,26 @@ describe('JobService', () => {
 
       expect(result.message).toEqual('Job with id 1 not found');
     });
+
+    it('should log an error message if the database call fails', async () => {
+      mockPrismaJobRepository.findByAdzunaId.mockRejectedValue(
+        new Error('Database Error'),
+      );
+
+      const loggerSpy = jest.spyOn(Logger, 'error');
+
+      const result = await service.getJob('1');
+
+      expect(mockPrismaJobRepository.findByAdzunaId).toHaveBeenCalledWith({
+        where: { adzuna_id: '1' },
+      });
+      expect(mockPrismaJobRepository.findByAdzunaId).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeInstanceOf(Object);
+      expect(result['message']).toEqual('Job with id 1 not found');
+
+      expect(loggerSpy).toHaveBeenCalledWith(`~ Database Error`);
+    });
   });
 
   describe('getJobKeywords', () => {
@@ -301,6 +321,24 @@ describe('JobService', () => {
 
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toEqual(2);
+    });
+
+    it('should log an error message if the database call fails', async () => {
+      mockPrismaJobRepository.findById.mockRejectedValue(
+        new Error('Database Error'),
+      );
+
+      const loggerSpy = jest.spyOn(Logger, 'error');
+
+      const result = await service.getJobKeywords('1');
+
+      expect(mockPrismaJobRepository.findById).toHaveBeenCalledWith('1');
+      expect(mockPrismaJobRepository.findById).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(0);
+
+      expect(loggerSpy).toHaveBeenCalledWith(`~ Database Error`);
     });
   });
 });
