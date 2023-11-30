@@ -39,15 +39,25 @@ export class JobController {
   ): Promise<ResponseDTO<JobDbResponse>> {
     const { results_per_page, what, where } = query;
 
-    const jobs = await this.jobService.getJobs({
-      results_per_page,
-      what,
-      where,
-    });
-
-    const response = new ResponseDTO(jobs, jobs.length);
-
-    return response;
+    if (
+      results_per_page !== undefined &&
+      what !== undefined &&
+      where !== undefined
+    ) {
+      // If all params are present, go to getJobs method
+      const jobs = await this.jobService.getJobs({
+        results_per_page,
+        what,
+        where,
+      });
+      const response = new ResponseDTO(jobs, jobs.length);
+      return response;
+    } else {
+      // If no params are present, go to getAllJobs method or any other method you want to use
+      const allJobs = await this.jobService.getAllJobs();
+      const response = new ResponseDTO(allJobs, allJobs.length);
+      return response;
+    }
   }
 
   @Get('/jobs/title')

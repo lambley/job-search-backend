@@ -100,6 +100,33 @@ export class JobService {
     }
   }
 
+  // url: /api/v1/jobs
+  // get all jobs from database - when no params are present
+  async getAllJobs(): Promise<JobDbResponse[]> {
+    const cacheKey = `getAllJobs`;
+
+    // check if the cache already has the job listings
+    const cachedJobs = this.cache.get(cacheKey);
+
+    if (cachedJobs) {
+      Logger.log(`Retrieved jobs from cache`, 'JobService');
+      return cachedJobs as JobDbResponse[];
+    }
+
+    try {
+      const jobListings = await this.jobRepository.findAll();
+      Logger.log(`${jobListings.length} job(s) found`, 'JobService');
+
+      // store the job listings in the cache
+      this.cache.set(cacheKey, jobListings);
+
+      return jobListings;
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+      return [];
+    }
+  }
+
   // url: /api/v1/jobs/:id
   async getJob(adzuna_id: string): Promise<JobDbResponse> {
     try {
