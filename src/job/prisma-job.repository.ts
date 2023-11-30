@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma.service';
 import { Job } from '@prisma/client';
 import { JobDBCreateRequest } from './types/job.interface';
 import { JobRepository } from './job.repository';
-import { parse } from 'path';
 
 type findUniqueArgs = {
   where: {
