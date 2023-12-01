@@ -32,6 +32,16 @@ export class JobService {
   app_id = this.configService.get<string>('ADZUNA_APP_ID');
   app_key = this.configService.get<string>('ADZUNA_API_KEY');
 
+  // cache keys
+  getJobsCacheKey = (params: getJobsParams): string => {
+    const { results_per_page, what, where } = params;
+    return `getJobs-${results_per_page}-${what}-${where}`;
+  };
+
+  getAllJobsCacheKey = (): string => {
+    return `getAllJobs`;
+  };
+
   // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
   // refresh jobs from API
   async refreshJobs(params: getJobsParams): Promise<JobResponse[]> {
@@ -60,7 +70,7 @@ export class JobService {
   // getJobs from database
   async getJobs(params: getJobsParams): Promise<JobDbResponse[]> {
     const { results_per_page, what, where } = params;
-    const cacheKey = `getJobs-${results_per_page}-${what}-${where}`;
+    const cacheKey = this.getJobsCacheKey(params);
 
     // check if the cache already has the job listings
     const cachedJobs = this.cache.get(cacheKey);
@@ -91,7 +101,7 @@ export class JobService {
   // url: /api/v1/jobs
   // get all jobs from database - when no params are present
   async getAllJobs(): Promise<JobDbResponse[]> {
-    const cacheKey = `getAllJobs`;
+    const cacheKey = this.getAllJobsCacheKey();
 
     // check if the cache already has the job listings
     const cachedJobs = this.cache.get(cacheKey);
