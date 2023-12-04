@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Param } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
 import { JobProcessorService } from '../job-processor/job-processor.service';
