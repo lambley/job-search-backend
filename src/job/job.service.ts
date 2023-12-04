@@ -188,7 +188,16 @@ export class JobService {
   }
 
   // url: /api/v1/jobs-top-keywords
-  async getTopKeywords(limit?: number): Promise<string[]> {
+  async getTopKeywords(
+    limit?: number,
+    forceUpdate?: boolean,
+  ): Promise<string[]> {
+    // Check if forceUpdate flag is set, if true, clear the cache
+    if (forceUpdate) {
+      this.cache.del(this.getTopKeywordsCacheKey());
+      Logger.log(`Cache cleared for top keywords`, 'JobService');
+    }
+
     // check if the cache already has the Top Keywords
     const cachedKeywords: string[] = this.cache.get(
       this.getTopKeywordsCacheKey(),
@@ -228,10 +237,6 @@ export class JobService {
         (a, b) => keywordCounts[b] - keywordCounts[a],
       );
 
-      // get the top keywords
-      if (!limit) {
-        limit = 10;
-      }
       const topKeywords = sortedKeywords.slice(0, limit);
 
       // store the job listings in the cache
