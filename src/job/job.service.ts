@@ -190,10 +190,10 @@ export class JobService {
   // url: /api/v1/jobs-top-keywords
   async getTopKeywords(
     limit?: number,
-    forceUpdate?: boolean,
+    forceUpdate?: string,
   ): Promise<string[]> {
     // Check if forceUpdate flag is set, if true, clear the cache
-    if (forceUpdate) {
+    if (forceUpdate === 'true') {
       this.cache.del(this.getTopKeywordsCacheKey());
       Logger.log(`Cache cleared for top keywords`, 'JobService');
     }

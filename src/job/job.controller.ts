@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, Logger } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
 import { JobProcessorService } from '../job-processor/job-processor.service';
@@ -87,7 +87,7 @@ export class JobController {
 
   @Get('jobs-top-keywords')
   async getTopKeywords(
-    @Query() query: { limit?: number; forceUpdate?: boolean },
+    @Query() query: { limit?: number; forceUpdate?: string },
   ): Promise<ResponseDTO<string>> {
     let { limit, forceUpdate } = query;
 
@@ -95,8 +95,8 @@ export class JobController {
       limit = 10;
     }
 
-    if (forceUpdate === undefined || typeof forceUpdate !== 'boolean') {
-      forceUpdate = false;
+    if (forceUpdate === undefined) {
+      forceUpdate = 'false';
     }
 
     const keywords = await this.jobService.getTopKeywords(limit, forceUpdate);
