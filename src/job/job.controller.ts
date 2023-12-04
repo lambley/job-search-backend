@@ -84,4 +84,13 @@ export class JobController {
     const response = new ResponseDTO(keywords, count);
     return response;
   }
+
+  @Get('jobs-top-keywords')
+  async getTopKeywords(): Promise<ResponseDTO<string>> {
+    const keywords = await this.jobService.getTopKeywords();
+    const count = keywords.length;
+
+    const response = new ResponseDTO(keywords, count);
+    return response;
+  }
 }

@@ -42,6 +42,10 @@ export class JobService {
     return `getAllJobs`;
   };
 
+  getTopKeywordsCacheKey = (): string => {
+    return `getTopKeywords`;
+  };
+
   // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
   // refresh jobs from API
   async refreshJobs(params: getJobsParams): Promise<JobResponse[]> {
@@ -177,6 +181,63 @@ export class JobService {
       const jobListings = await this.jobRepository.findByTitle(title);
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
       return jobListings;
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+      return [];
+    }
+  }
+
+  // url: /api/v1/jobs-top-keywords
+  async getTopKeywords(limit?: number): Promise<string[]> {
+    // check if the cache already has the Top Keywords
+    const cachedKeywords: string[] = this.cache.get(
+      this.getTopKeywordsCacheKey(),
+    );
+
+    if (cachedKeywords) {
+      Logger.log(`Retrieved jobs from cache`, 'JobService');
+      return cachedKeywords;
+    }
+
+    try {
+      // get all the job listings
+      let allJobs: JobDbResponse[] = [];
+      if (this.cache.get(this.getAllJobsCacheKey())) {
+        allJobs = this.cache.get(this.getAllJobsCacheKey());
+        Logger.log(`Retrieved jobs from cache`, 'JobService');
+      } else {
+        allJobs = await this.jobRepository.findAll();
+        Logger.log(`${allJobs.length} job(s) found`, 'JobService');
+      }
+
+      // get all the keywords from the job listings
+      const allKeywords = allJobs.map((job) => job.processed_keywords).flat();
+
+      // count the number of times each keyword appears
+      const keywordCounts = allKeywords.reduce((acc, curr) => {
+        if (acc[curr]) {
+          acc[curr] += 1;
+        } else {
+          acc[curr] = 1;
+        }
+        return acc;
+      }, {});
+
+      // sort the keywords by the number of times they appear
+      const sortedKeywords = Object.keys(keywordCounts).sort(
+        (a, b) => keywordCounts[b] - keywordCounts[a],
+      );
+
+      // get the top keywords
+      if (!limit) {
+        limit = 10;
+      }
+      const topKeywords = sortedKeywords.slice(0, limit);
+
+      // store the job listings in the cache
+      this.cache.set(this.getTopKeywordsCacheKey(), topKeywords);
+
+      return topKeywords;
     } catch (error) {
       Logger.error(`~ ${error.message}`);
       return [];
