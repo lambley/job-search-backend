@@ -16,6 +16,7 @@ interface getJobsParams {
   results_per_page: number;
   what: string;
   where: string;
+  force_update?: string;
 }
 
 @Injectable()
@@ -73,8 +74,15 @@ export class JobService {
   // url: /api/v1/jobs?results_per_page=[number]&what=[string]&where=[string]
   // getJobs from database
   async getJobs(params: getJobsParams): Promise<JobDbResponse[]> {
-    const { results_per_page, what, where } = params;
+    const { results_per_page, what, where, force_update } = params;
+
     const cacheKey = this.getJobsCacheKey(params);
+
+    // Check if force_update flag is set, if true, clear the cache
+    if (force_update === 'true') {
+      this.cache.del(cacheKey);
+      Logger.log(`Cache cleared for top keywords`, 'JobService');
+    }
 
     // check if the cache already has the job listings
     const cachedJobs = this.cache.get(cacheKey);
@@ -104,8 +112,14 @@ export class JobService {
 
   // url: /api/v1/jobs
   // get all jobs from database - when no params are present
-  async getAllJobs(): Promise<JobDbResponse[]> {
+  async getAllJobs(force_update?: string): Promise<JobDbResponse[]> {
     const cacheKey = this.getAllJobsCacheKey();
+
+    // Check if force_update flag is set, if true, clear the cache
+    if (force_update === 'true') {
+      this.cache.del(cacheKey);
+      Logger.log(`Cache cleared for top keywords`, 'JobService');
+    }
 
     // check if the cache already has the job listings
     const cachedJobs = this.cache.get(cacheKey);

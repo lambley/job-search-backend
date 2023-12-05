@@ -35,9 +35,21 @@ export class JobController {
 
   @Get('/jobs')
   async getJobs(
-    @Query() query: { results_per_page: number; what: string; where: string },
+    @Query()
+    query: {
+      results_per_page: number;
+      what: string;
+      where: string;
+      force_update: string;
+    },
   ): Promise<ResponseDTO<JobDbResponse>> {
     const { results_per_page, what, where } = query;
+    let { force_update } = query;
+
+    // Set force_update to false if not present
+    if (force_update === undefined) {
+      force_update = 'false';
+    }
 
     if (
       results_per_page !== undefined &&
@@ -49,12 +61,13 @@ export class JobController {
         results_per_page,
         what,
         where,
+        force_update,
       });
       const response = new ResponseDTO(jobs, jobs.length);
       return response;
     } else {
       // If no params are present, go to getAllJobs method or any other method you want to use
-      const allJobs = await this.jobService.getAllJobs();
+      const allJobs = await this.jobService.getAllJobs(force_update);
       const response = new ResponseDTO(allJobs, allJobs.length);
       return response;
     }
