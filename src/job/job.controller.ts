@@ -87,19 +87,19 @@ export class JobController {
 
   @Get('jobs-top-keywords')
   async getTopKeywords(
-    @Query() query: { limit?: number; forceUpdate?: string },
+    @Query() query: { limit?: number; force_update?: string },
   ): Promise<ResponseDTO<string>> {
-    let { limit, forceUpdate } = query;
+    let { limit, force_update } = query;
 
     if (limit === undefined) {
       limit = 10;
     }
 
-    if (forceUpdate === undefined) {
-      forceUpdate = 'false';
+    if (force_update === undefined) {
+      force_update = 'false';
     }
 
-    const keywords = await this.jobService.getTopKeywords(limit, forceUpdate);
+    const keywords = await this.jobService.getTopKeywords(limit, force_update);
     const count = keywords.length;
 
     const response = new ResponseDTO(keywords, count);
