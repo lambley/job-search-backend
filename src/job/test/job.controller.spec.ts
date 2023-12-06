@@ -12,6 +12,7 @@ import { PrismaJobRepository } from '../prisma-job.repository';
 import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
 import { getQueueToken } from '@nestjs/bull';
 import { ResponseDTO } from '../dto/response.dto';
+import { after } from 'node:test';
 
 const mockQueue = {
   add: jest.fn(),
@@ -80,36 +81,72 @@ describe('JobController', () => {
   });
 
   describe('getJobs', () => {
-    it('should return an array of job responses', async () => {
-      const query = {
+    let query;
+
+    beforeEach(() => {
+      query = {
         results_per_page: 10,
         what: 'keyword',
         where: 'location',
+        force_update: 'false',
       };
-      const response = jobDbResultsFactory(10);
-
-      const expectedResponse = new ResponseDTO(response, response.length);
-
-      jest.spyOn(jobService, 'getJobs').mockResolvedValue(response);
-
-      const result = await jobController.getJobs(query);
-      expect(result).toEqual(expectedResponse);
     });
 
-    it('should return a response with a count of 0 if no jobs are found', async () => {
-      const query = {
-        results_per_page: 10,
-        what: 'keyword',
-        where: 'location',
-      };
-      const response = [];
+    afterEach(() => {
+      query = null;
+    });
 
-      const expectedResponse = new ResponseDTO(response, response.length);
+    describe('when force_update is false', () => {
+      it('should return an array of job responses', async () => {
+        const response = jobDbResultsFactory(10);
 
-      jest.spyOn(jobService, 'getJobs').mockResolvedValue(response);
+        const expectedResponse = new ResponseDTO(response, response.length);
 
-      const result = await jobController.getJobs(query);
-      expect(result).toEqual(expectedResponse);
+        jest.spyOn(jobService, 'getJobs').mockResolvedValue(response);
+
+        const result = await jobController.getJobs(query);
+        expect(result).toEqual(expectedResponse);
+      });
+
+      it('should return a response with a count of 0 if no jobs are found', async () => {
+        const response = [];
+
+        const expectedResponse = new ResponseDTO(response, response.length);
+
+        jest.spyOn(jobService, 'getJobs').mockResolvedValue(response);
+
+        const result = await jobController.getJobs(query);
+        expect(result).toEqual(expectedResponse);
+      });
+    });
+
+    describe('when force_update is true', () => {
+      it('should return an array of job responses', async () => {
+        query.force_update = 'true';
+        const response = jobDbResultsFactory(10);
+
+        const expectedResponse = new ResponseDTO(response, response.length);
+
+        jest.spyOn(jobService, 'getJobs').mockResolvedValue(response);
+
+        const result = await jobController.getJobs(query);
+
+        console.log(result);
+
+        expect(result).toEqual(expectedResponse);
+      });
+
+      it('should return a response with a count of 0 if no jobs are found', async () => {
+        query.force_update = 'true';
+        const response = [];
+
+        const expectedResponse = new ResponseDTO(response, response.length);
+
+        jest.spyOn(jobService, 'getJobs').mockResolvedValue(response);
+
+        const result = await jobController.getJobs(query);
+        expect(result).toEqual(expectedResponse);
+      });
     });
   });
 
