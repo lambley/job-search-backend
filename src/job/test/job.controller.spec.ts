@@ -12,7 +12,6 @@ import { PrismaJobRepository } from '../prisma-job.repository';
 import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
 import { getQueueToken } from '@nestjs/bull';
 import { ResponseDTO } from '../dto/response.dto';
-import { after } from 'node:test';
 
 const mockQueue = {
   add: jest.fn(),
@@ -21,7 +20,6 @@ const mockQueue = {
 describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
-  let jobProcessorService: JobProcessorService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,7 +41,6 @@ describe('JobController', () => {
 
     jobController = module.get<JobController>(JobController);
     jobService = module.get<JobService>(JobService);
-    jobProcessorService = module.get<JobProcessorService>(JobProcessorService);
   });
 
   describe('refreshJobs', () => {
@@ -227,19 +224,4 @@ describe('JobController', () => {
       expect(result).toEqual(mockResponse);
     });
   });
-
-  // describe('processJob', () => {
-  //   it('should process a job description', async () => {
-  //     const jobData = { description: 'Job description here' };
-
-  //     jest
-  //       .spyOn(jobProcessorService, 'processJobDescription')
-  //       .mockResolvedValue([jobData.description]);
-
-  //     await jobController.processJob(jobData);
-  //     expect(jobProcessorService.processJobDescription).toHaveBeenCalledWith(
-  //       jobData.description,
-  //     );
-  //   });
-  // });
 });
