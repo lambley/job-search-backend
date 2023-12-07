@@ -129,8 +129,6 @@ describe('JobController', () => {
 
           const result = await jobController.getJobs(query);
 
-          console.log(result);
-
           expect(result).toEqual(expectedResponse);
         });
 
@@ -210,6 +208,23 @@ describe('JobController', () => {
           expect(result).toEqual(expectedResponse);
         });
       });
+    });
+  });
+
+  describe('getJobsByTitle', () => {
+    it('should return an array of job responses', async () => {
+      const mockResponse = jobDbResultsFactory(10);
+      const title = 'Software Engineer';
+
+      const expectedResponse = new ResponseDTO(
+        mockResponse,
+        mockResponse.length,
+      );
+
+      jest.spyOn(jobService, 'getJobsByTitle').mockResolvedValue(mockResponse);
+
+      const result = await jobController.getJobsByTitle(title);
+      expect(result).toEqual(expectedResponse);
     });
   });
 
