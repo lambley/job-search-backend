@@ -257,5 +257,152 @@ describe('JobController', () => {
     });
   });
 
-  describe('getTopKeywords', () => {});
+  describe('getTopKeywords', () => {
+    let mockResponse, limit, defaultLimit;
+
+    beforeEach(() => {
+      mockResponse = [
+        'keyword1',
+        'keyword2',
+        'keyword3',
+        'keyword4',
+        'keyword5',
+        'keyword6',
+        'keyword7',
+        'keyword8',
+        'keyword9',
+        'keyword10',
+        'keyword11',
+      ];
+      limit = 5;
+      defaultLimit = 10;
+    });
+
+    afterEach(() => {
+      mockResponse = null;
+    });
+    describe('when limit is not present', () => {
+      it('should return an array of keywords of default length', async () => {
+        const expectedResponse = new ResponseDTO(
+          mockResponse.slice(0, defaultLimit),
+          defaultLimit,
+        );
+
+        jest
+          .spyOn(jobService, 'getTopKeywords')
+          .mockResolvedValue(mockResponse.slice(0, defaultLimit));
+
+        const result = await jobController.getTopKeywords({});
+
+        expect(result).toEqual(expectedResponse);
+        expect(jobService.getTopKeywords).toHaveBeenCalledWith(
+          defaultLimit,
+          'false',
+        );
+        expect(result.data.length).toEqual(defaultLimit);
+      });
+    });
+
+    describe('when limit is present', () => {
+      it('should return an array of keywords of specified length', async () => {
+        const expectedResponse = new ResponseDTO(
+          mockResponse.slice(0, limit),
+          limit,
+        );
+
+        jest
+          .spyOn(jobService, 'getTopKeywords')
+          .mockResolvedValue(mockResponse.slice(0, limit));
+
+        const result = await jobController.getTopKeywords({ limit: limit });
+        expect(result).toEqual(expectedResponse);
+        expect(jobService.getTopKeywords).toHaveBeenCalledWith(limit, 'false');
+        expect(result.data.length).toEqual(limit);
+      });
+    });
+
+    describe('when force_update is false', () => {
+      it('should return an array of keywords of default length', async () => {
+        const expectedResponse = new ResponseDTO(
+          mockResponse.slice(0, defaultLimit),
+          defaultLimit,
+        );
+
+        jest
+          .spyOn(jobService, 'getTopKeywords')
+          .mockResolvedValue(mockResponse.slice(0, defaultLimit));
+
+        const result = await jobController.getTopKeywords({
+          force_update: 'false',
+        });
+        expect(result).toEqual(expectedResponse);
+        expect(jobService.getTopKeywords).toHaveBeenCalledWith(
+          defaultLimit,
+          'false',
+        );
+        expect(result.data.length).toEqual(defaultLimit);
+      });
+
+      it('should return an array of keywords of specified length', async () => {
+        const expectedResponse = new ResponseDTO(
+          mockResponse.slice(0, limit),
+          limit,
+        );
+
+        jest
+          .spyOn(jobService, 'getTopKeywords')
+          .mockResolvedValue(mockResponse.slice(0, limit));
+
+        const result = await jobController.getTopKeywords({
+          limit: limit,
+          force_update: 'false',
+        });
+        expect(result).toEqual(expectedResponse);
+        expect(jobService.getTopKeywords).toHaveBeenCalledWith(limit, 'false');
+        expect(result.data.length).toEqual(limit);
+      });
+    });
+
+    describe('when force_update is true', () => {
+      it('should return an array of keywords of default length', async () => {
+        const expectedResponse = new ResponseDTO(
+          mockResponse.slice(0, defaultLimit),
+          defaultLimit,
+        );
+
+        jest
+          .spyOn(jobService, 'getTopKeywords')
+          .mockResolvedValue(mockResponse.slice(0, defaultLimit));
+
+        const result = await jobController.getTopKeywords({
+          force_update: 'true',
+        });
+        expect(result).toEqual(expectedResponse);
+        expect(jobService.getTopKeywords).toHaveBeenCalledWith(
+          defaultLimit,
+          'true',
+        );
+        expect(result.data.length).toEqual(defaultLimit);
+      });
+
+      it('should return an array of keywords of specified length', async () => {
+        const expectedResponse = new ResponseDTO(
+          mockResponse.slice(0, limit),
+          limit,
+        );
+
+        jest
+          .spyOn(jobService, 'getTopKeywords')
+          .mockResolvedValue(mockResponse.slice(0, limit));
+
+        const result = await jobController.getTopKeywords({
+          limit: limit,
+          force_update: 'true',
+        });
+        expect(result).toEqual(expectedResponse);
+        expect(jobService.getTopKeywords).toHaveBeenCalledWith(limit, 'true');
+        expect(result.data.length).toEqual(limit);
+      });
+    });
+  });
 });
