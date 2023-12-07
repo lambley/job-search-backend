@@ -239,4 +239,23 @@ describe('JobController', () => {
       expect(result).toEqual(mockResponse);
     });
   });
+
+  describe('getJobKeywords', () => {
+    it('should return an array of keywords for a job by ID', async () => {
+      const mockResponse = ['keyword1', 'keyword2', 'keyword3'];
+      const id = '1234567890';
+
+      const expectedResponse = new ResponseDTO(
+        mockResponse,
+        mockResponse.length,
+      );
+
+      jest.spyOn(jobService, 'getJobKeywords').mockResolvedValue(mockResponse);
+
+      const result = await jobController.getJobKeywords(id);
+      expect(result).toEqual(expectedResponse);
+    });
+  });
+
+  describe('getTopKeywords', () => {});
 });
