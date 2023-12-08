@@ -23,6 +23,7 @@ jest.mock('node-cache', () => {
     return {
       get: jest.fn(),
       set: jest.fn(),
+      del: jest.fn(),
     };
   });
 });
@@ -405,6 +406,114 @@ describe('JobService', () => {
 
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toEqual(params.results_per_page);
+    });
+  });
+
+  describe('getTopKeywords', () => {
+    let mockResponse, limit, defaultLimit;
+
+    beforeEach(() => {
+      mockResponse = [
+        'keyword1',
+        'keyword2',
+        'keyword3',
+        'keyword4',
+        'keyword5',
+        'keyword6',
+        'keyword7',
+        'keyword8',
+        'keyword9',
+        'keyword10',
+        'keyword11',
+      ];
+      limit = 5;
+      defaultLimit = 10;
+    });
+
+    describe('when limit is not passed', () => {
+      it('should return an array of keywords of default length', async () => {
+        const mockCacheResponse = mockResponse.slice(0, defaultLimit);
+
+        service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+
+        const result = await service.getTopKeywords();
+
+        expect(service.cache.get).toHaveBeenCalledWith(
+          `getTopKeywords-${defaultLimit}`,
+        );
+        expect(service.cache.get).toHaveBeenCalledTimes(1);
+        expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(defaultLimit);
+      });
+    });
+    describe('when limit is passed', () => {
+      it('should return an array of keywords of specified length', async () => {
+        const mockCacheResponse = mockResponse.slice(0, limit);
+
+        service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+
+        const result = await service.getTopKeywords(limit);
+
+        expect(service.cache.get).toHaveBeenCalledWith(
+          `getTopKeywords-${limit}`,
+        );
+        expect(service.cache.get).toHaveBeenCalledTimes(1);
+        expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(limit);
+      });
+    });
+
+    describe('when force_update is not passed', () => {
+      it('should return an array of keywords from the cache', async () => {
+        const mockCacheResponse = mockResponse.slice(0, limit);
+
+        service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+
+        const result = await service.getTopKeywords(limit);
+
+        expect(service.cache.get).toHaveBeenCalledWith(
+          `getTopKeywords-${limit}`,
+        );
+        expect(service.cache.get).toHaveBeenCalledTimes(1);
+        expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(limit);
+      });
+
+      it('should return an array of keywords from the database if not in the cache', async () => {
+        const mockDbResponse = jobDbResultsFactory(limit);
+
+        mockPrismaJobRepository.findAll.mockResolvedValue(mockDbResponse);
+
+        const result = await service.getTopKeywords(limit);
+
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(limit);
+      });
+    });
+
+    describe('when force_update is passed', () => {
+      it('should return an array of keywords from the database', async () => {
+        const mockDbResponse = jobDbResultsFactory(limit);
+
+        mockPrismaJobRepository.findAll.mockResolvedValue(mockDbResponse);
+
+        const result = await service.getTopKeywords(limit, 'true');
+
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(limit);
+      });
     });
   });
 });
