@@ -43,8 +43,8 @@ export class JobService {
     return `getAllJobs`;
   };
 
-  getTopKeywordsCacheKey = (): string => {
-    return `getTopKeywords`;
+  getTopKeywordsCacheKey = (limit: number): string => {
+    return `getTopKeywords-${limit}`;
   };
 
   // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
@@ -206,15 +206,20 @@ export class JobService {
     limit?: number,
     force_update?: string,
   ): Promise<string[]> {
+    // check if limit is present, if not, set it to 10
+    if (limit === undefined) {
+      limit = 10;
+    }
+
     // Check if force_update flag is set, if true, clear the cache
     if (force_update === 'true') {
-      this.cache.del(this.getTopKeywordsCacheKey());
+      this.cache.del(this.getTopKeywordsCacheKey(limit));
       Logger.log(`Cache cleared for top keywords`, 'JobService');
     }
 
     // check if the cache already has the Top Keywords
     const cachedKeywords: string[] = this.cache.get(
-      this.getTopKeywordsCacheKey(),
+      this.getTopKeywordsCacheKey(limit),
     );
 
     if (cachedKeywords) {
@@ -254,7 +259,7 @@ export class JobService {
       const topKeywords = sortedKeywords.slice(0, limit);
 
       // store the job listings in the cache
-      this.cache.set(this.getTopKeywordsCacheKey(), topKeywords);
+      this.cache.set(this.getTopKeywordsCacheKey(limit), topKeywords);
 
       return topKeywords;
     } catch (error) {
