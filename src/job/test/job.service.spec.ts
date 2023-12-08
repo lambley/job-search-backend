@@ -169,6 +169,78 @@ describe('JobService', () => {
       expect(result.length).toEqual(params.results_per_page);
     });
 
+    describe('getAllJobs - getJobs when no params are passed', () => {
+      it('should get all jobs from the database', async () => {
+        const mockDbResponse = jobDbResultsFactory(30);
+
+        mockPrismaJobRepository.findAll.mockResolvedValue(mockDbResponse);
+
+        const result = await service.getAllJobs();
+
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(30);
+      });
+
+      it('should log the number of jobs found', async () => {
+        const mockDbResponse = jobDbResultsFactory(30);
+
+        mockPrismaJobRepository.findAll.mockResolvedValue(mockDbResponse);
+
+        const loggerSpy = jest.spyOn(Logger, 'log');
+
+        const result = await service.getAllJobs();
+
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(30);
+
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `${result.length} job(s) found`,
+          'JobService',
+        );
+      });
+
+      it('should log an error message if the database call fails', async () => {
+        mockPrismaJobRepository.findAll.mockRejectedValue(
+          new Error('Database Error'),
+        );
+
+        const loggerSpy = jest.spyOn(Logger, 'error');
+
+        const result = await service.getAllJobs();
+
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
+
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(0);
+
+        expect(loggerSpy).toHaveBeenCalledWith(`~ Database Error`);
+      });
+
+      it('should cache the jobs for 1 hour', async () => {
+        const mockDbResponse = jobDbResultsFactory(30);
+
+        mockPrismaJobRepository.findAll.mockResolvedValue(mockDbResponse);
+
+        const result = await service.getAllJobs();
+
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
+        expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toEqual(30);
+
+        expect(service.cache.set).toHaveBeenCalledWith(
+          'getAllJobs',
+          result,
+          3600,
+        );
+      });
+    });
+
     describe('getJobs logging', () => {
       it('should log the number of jobs found', async () => {
         const mockDbResponse = jobDbResultsFactory(params.results_per_page);
