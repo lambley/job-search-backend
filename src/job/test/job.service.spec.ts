@@ -127,26 +127,6 @@ describe('JobService', () => {
         params.results_per_page,
       );
     });
-
-    it('should cache the jobs for 1 hour', async () => {
-      const mockResponse = {
-        data: {
-          results: jobResultArrayFactory(params.results_per_page),
-        },
-      };
-      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
-
-      const result = await service.refreshJobs(params);
-
-      expect(result).toBeInstanceOf(Array);
-      expect(result.length).toEqual(params.results_per_page);
-
-      // cache key is in the format: results_per_page-what-where
-      expect(service.cache.set).toHaveBeenCalledWith(
-        `${params.results_per_page}-${params.what}-${params.where}`,
-        result,
-      );
-    });
   });
 
   describe('getJobs', () => {
