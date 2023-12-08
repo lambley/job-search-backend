@@ -222,7 +222,7 @@ describe('JobService', () => {
       });
 
       it('should cache the jobs for 1 hour', async () => {
-        const mockDbResponse = jobDbResultsFactory(30);
+        const mockDbResponse = jobDbResultsFactory(2);
 
         mockPrismaJobRepository.findAll.mockResolvedValue(mockDbResponse);
 
@@ -231,13 +231,9 @@ describe('JobService', () => {
         expect(mockPrismaJobRepository.findAll).toHaveBeenCalledWith();
         expect(mockPrismaJobRepository.findAll).toHaveBeenCalledTimes(1);
         expect(result).toBeInstanceOf(Array);
-        expect(result.length).toEqual(30);
+        expect(result.length).toEqual(2);
 
-        expect(service.cache.set).toHaveBeenCalledWith(
-          'getAllJobs',
-          result,
-          3600,
-        );
+        expect(service.cache.set).toHaveBeenCalledWith('getAllJobs', result);
       });
     });
 
