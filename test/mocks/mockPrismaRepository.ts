@@ -6,6 +6,9 @@ const mockPrismaJobRepository = {
   findAll: jest.fn(),
   updateById: jest.fn(),
   deleteById: jest.fn(),
+  getKeywords: jest.fn(),
+  saveKeywords: jest.fn(),
+  findByTitle: jest.fn(),
 };
 
 export { mockPrismaJobRepository };

@@ -341,4 +341,22 @@ describe('JobService', () => {
       expect(loggerSpy).toHaveBeenCalledWith(`~ Database Error`);
     });
   });
+
+  describe('getJobsByTitle', () => {
+    it('should return an array of jobs', async () => {
+      const mockDbResponse = jobDbResultsFactory(params.results_per_page);
+
+      mockPrismaJobRepository.findByTitle.mockResolvedValue(mockDbResponse);
+
+      const result = await service.getJobsByTitle(params.what);
+
+      expect(mockPrismaJobRepository.findByTitle).toHaveBeenCalledWith(
+        params.what,
+      );
+      expect(mockPrismaJobRepository.findByTitle).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toEqual(params.results_per_page);
+    });
+  });
 });
