@@ -84,20 +84,6 @@ export class JobController {
     return response;
   }
 
-  @Get('/jobs/:adzuna_id')
-  async getJob(@Param('adzuna_id') adzuna_id: string): Promise<JobDbResponse> {
-    return this.jobService.getJob(adzuna_id);
-  }
-
-  @Get('/jobs/:id/keywords')
-  async getJobKeywords(@Param('id') id: string): Promise<ResponseDTO<string>> {
-    const keywords = await this.jobService.getJobKeywords(id);
-    const count = keywords.length;
-
-    const response = new ResponseDTO(keywords, count);
-    return response;
-  }
-
   @Get('jobs/top-keywords')
   async getTopKeywords(
     @Query() query: { limit?: number; force_update?: string },
@@ -113,6 +99,20 @@ export class JobController {
     }
 
     const keywords = await this.jobService.getTopKeywords(limit, force_update);
+    const count = keywords.length;
+
+    const response = new ResponseDTO(keywords, count);
+    return response;
+  }
+
+  @Get('/jobs/:adzuna_id')
+  async getJob(@Param('adzuna_id') adzuna_id: string): Promise<JobDbResponse> {
+    return this.jobService.getJob(adzuna_id);
+  }
+
+  @Get('/jobs/:id/keywords')
+  async getJobKeywords(@Param('id') id: string): Promise<ResponseDTO<string>> {
+    const keywords = await this.jobService.getJobKeywords(id);
     const count = keywords.length;
 
     const response = new ResponseDTO(keywords, count);
