@@ -98,7 +98,7 @@ export class JobController {
     return response;
   }
 
-  @Get('jobs-top-keywords')
+  @Get('jobs/top-keywords')
   async getTopKeywords(
     @Query() query: { limit?: number; force_update?: string },
   ): Promise<ResponseDTO<string>> {

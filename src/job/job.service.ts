@@ -201,7 +201,7 @@ export class JobService {
     }
   }
 
-  // url: /api/v1/jobs-top-keywords
+  // url: /api/v1/jobs/top-keywords
   async getTopKeywords(
     limit?: number,
     force_update?: string,
