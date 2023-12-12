@@ -4,6 +4,10 @@ import { words as StopWords } from 'natural/lib/natural/util/stopwords';
 import { Logger } from '@nestjs/common';
 import { ProcessJobData } from 'src/types/job-process-data';
 import { PrismaJobRepository } from '../job/prisma-job.repository';
+import {
+  softwareEngineeringKeywords,
+  generalSoftSkillsKeywords,
+} from 'src/utils/constants';
 
 @Injectable()
 export class JobProcessorService {
@@ -41,12 +45,16 @@ export class JobProcessorService {
     for (const word of words) {
       const lowercaseWord = word.toLowerCase();
       if (!StopWords.includes(lowercaseWord)) {
-        uniqueWordsSet.add(lowercaseWord);
+        if (
+          softwareEngineeringKeywords.includes(lowercaseWord) ||
+          generalSoftSkillsKeywords.includes(lowercaseWord)
+        ) {
+          uniqueWordsSet.add(lowercaseWord);
+        }
       }
     }
 
-    const uniqueWords = Array.from(uniqueWordsSet);
-    return uniqueWords;
+    return Array.from(uniqueWordsSet);
   }
 
   async saveKeywordsToDatabase(id: string, keywords: string[]): Promise<void> {
