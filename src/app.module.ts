@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import * as cors from 'cors';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { config } from '../config/configuration';
@@ -29,4 +30,16 @@ import { JobConsumerModule } from './job-consumer/job-consumer.module';
   ],
   providers: [JobService, PrismaService, PrismaJobRepository],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        cors({
+          origin: 'http://localhost:3001',
+          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+          credentials: true,
+        }),
+      )
+      .forRoutes('/api/*');
+  }
+}
