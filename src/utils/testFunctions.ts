@@ -2,6 +2,8 @@ const randomStringFromArray = (
   array: string[],
   returnLength: number,
 ): string => {
+  if (array.length === 0 || returnLength < 0) return '';
+
   const returnString: string[] = [];
 
   for (let i = 0; i < returnLength; i++) {
