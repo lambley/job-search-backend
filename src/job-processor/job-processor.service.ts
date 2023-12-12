@@ -7,7 +7,7 @@ import { PrismaJobRepository } from '../job/prisma-job.repository';
 import {
   softwareEngineeringKeywords,
   generalSoftSkillsKeywords,
-} from 'src/utils/constants';
+} from '../utils/constants';
 
 @Injectable()
 export class JobProcessorService {

@@ -4,6 +4,11 @@ import { WordTokenizer } from 'natural/lib/natural/tokenizers';
 import { words as StopWords } from 'natural/lib/natural/util/stopwords';
 import { PrismaJobRepository } from '../../job/prisma-job.repository';
 import { PrismaService } from '../../prisma.service';
+import {
+  softwareEngineeringKeywords,
+  generalSoftSkillsKeywords,
+} from '../../utils/constants';
+import { randomStringFromArray } from '../../utils/testFunctions';
 
 describe('JobProcessorService', () => {
   let module: TestingModule;
@@ -24,7 +29,12 @@ describe('JobProcessorService', () => {
     for (const word of tokenizedWords) {
       const lowercaseWord = word.toLowerCase();
       if (!StopWords.includes(lowercaseWord)) {
-        uniqueWordsSet.add(lowercaseWord);
+        if (
+          softwareEngineeringKeywords.includes(lowercaseWord) ||
+          generalSoftSkillsKeywords.includes(lowercaseWord)
+        ) {
+          uniqueWordsSet.add(lowercaseWord);
+        }
       }
     }
 
@@ -53,6 +63,12 @@ describe('JobProcessorService', () => {
     adzuna_id: '3',
   };
 
+  const softwareEngineeringKeywordsOnlyJob = {
+    description: randomStringFromArray(softwareEngineeringKeywords, 15),
+    id: '4',
+    adzuna_id: '4',
+  };
+
   it('should be defined', () => {
     expect(module).toBeDefined();
   });
@@ -74,6 +90,15 @@ describe('JobProcessorService', () => {
     // description with stop words only
     result = await jobProcessorService.processJobDescription(stopWordsOnlyJob);
     expectedResult = filterStopWords(stopWordsOnlyJob.description);
+    expect(result).toEqual(expectedResult);
+
+    // description with software engineering keywords only
+    result = await jobProcessorService.processJobDescription(
+      softwareEngineeringKeywordsOnlyJob,
+    );
+    expectedResult = filterStopWords(
+      softwareEngineeringKeywordsOnlyJob.description,
+    );
     expect(result).toEqual(expectedResult);
   });
 });
