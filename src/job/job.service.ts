@@ -268,6 +268,45 @@ export class JobService {
     }
   }
 
+  // url: /api/v1/jobs/reprocess-keywords
+  async reprocessKeywords(): Promise<void> {
+    try {
+      const allJobs = await this.jobRepository.findAll();
+
+      for (const job of allJobs) {
+        const { id, description, adzuna_id } = job;
+
+        // Add the job description to the processing queue
+        try {
+          await this.jobQueue.add(
+            'processJob',
+            {
+              description,
+              id,
+              adzuna_id,
+            },
+            {
+              timeout: 10000,
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 1000,
+              },
+            },
+          );
+          Logger.log(
+            `Added job ${job.title} to the processing queue`,
+            'JobService',
+          );
+        } catch (error) {
+          Logger.error(`~ ${error.message}`);
+        }
+      }
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+    }
+  }
+
   private async saveJobsToDatabase(jobs: JobResponse[]): Promise<void> {
     for (const job of jobs) {
       const {

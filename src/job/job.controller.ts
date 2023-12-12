@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
 import { JobProcessorService } from '../job-processor/job-processor.service';
@@ -103,6 +110,21 @@ export class JobController {
 
     const response = new ResponseDTO(keywords, count);
     return response;
+  }
+
+  // should only be used when the keywords lists are updated
+  @Get('jobs/reprocess-keywords')
+  async reprocessKeywords(): Promise<{ message: string }> {
+    try {
+      await this.jobService.reprocessKeywords();
+      return { message: 'Job reprocessing completed successfully' };
+    } catch (error) {
+      // If an error occurs during job reprocessing, return a failure response
+      throw new HttpException(
+        'Job reprocessing failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get('/jobs/:adzuna_id')
