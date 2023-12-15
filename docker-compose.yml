@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgresql
+    command: bash -c "npx prisma migrate deploy && npm start"
+    networks:
+      - app-network
+
+  postgresql:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DEV_DB_USERNAME}
+      POSTGRES_PASSWORD: ${DEV_DB_PASSWORD}
+      POSTGRES_DB: ${DEV_DB_NAME}
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    command: bash -c "docker-entrypoint.sh postgres && npx prisma migrate deploy"
+    networks:
+      - app-network
+
+  redis-server:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./redis-data:/data
+    command: ["redis-server", "--requirepass", ""]
+    networks:
+      - app-network
+
+  redis-cli-monitor:
+    image: redis:latest
+    depends_on:
+      redis-server:
+        condition: service_healthy
+    command: ["bash", "-c", "sleep 10 && redis-cli -h redis-server monitor"]
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

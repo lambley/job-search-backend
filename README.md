@@ -40,6 +40,37 @@ npm prisma:migration:run
 
 ## Running the app
 
+Running the app with Docker:
+
+- First, install [Docker Desktop](https://www.docker.com/products/docker-desktop)
+
+- Then run the following commands:
+
+```zsh
+docker-compose build
+docker-compose up
+```
+
+- If you need to rebuild the image, run:
+
+```zsh
+docker-compose down -v # to remove the postgres and redis volumes
+docker-compose build --no-cache
+```
+
+### Docker services
+
+The following services are set up in the `docker-compose.yml` file:
+
+- `nestjs-app`: the NestJS app
+- `postgresql`: the PostgreSQL database
+- `redis-server`: the Redis server
+- `redis-cli-monitor`: the Redis CLI monitor
+
+All connected via a Docker network - `app-network`.
+
+#### Old localhost instructions:
+
 Start the redis server and monitor:
 
 ```zsh
@@ -120,16 +151,7 @@ nest start --watch
 }
 ```
 
-### GET /generate_keywords
-
-`url`: /jobs/:id/keywords
-`returns`: an array of keywords processed using [`natural`](https://naturalnode.github.io/natural/) library
-
-```json
-["keyword1", "keyword2", "keyword3"]
-```
-
-NB: may be removed as a separate endpoint as keyword processing is handled as a background job.
+### NEED TO UPDATE WITH THE OTHER ENDPOINTS
 
 ## Background jobs
 

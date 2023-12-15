@@ -20,7 +20,7 @@ import { JobConsumerModule } from './job-consumer/job-consumer.module';
     BullModule.forRoot({
       // local config - change later
       redis: {
-        host: 'localhost',
+        host: 'redis-server',
         port: 6379,
       },
     }),
