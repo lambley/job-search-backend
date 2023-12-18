@@ -11,7 +11,7 @@ services:
       - postgresql
     command: bash -c "npx prisma migrate deploy && npm start"
     networks:
-      - app-network
+      - job-search-network
 
   postgresql:
     image: postgres:latest
@@ -25,7 +25,7 @@ services:
       - ./init:/docker-entrypoint-initdb.d
     command: bash -c "docker-entrypoint.sh postgres && npx prisma migrate deploy"
     networks:
-      - app-network
+      - job-search-network
 
   redis-server:
     image: redis:latest
@@ -40,7 +40,7 @@ services:
       - ./redis-data:/data
     command: ["redis-server", "--requirepass", ""]
     networks:
-      - app-network
+      - job-search-network
 
   redis-cli-monitor:
     image: redis:latest
@@ -49,8 +49,8 @@ services:
         condition: service_healthy
     command: ["bash", "-c", "sleep 10 && redis-cli -h redis-server monitor"]
     networks:
-      - app-network
+      - job-search-network
 
 networks:
-  app-network:
+  job-search-network:
     driver: bridge
