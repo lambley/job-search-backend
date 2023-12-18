@@ -10,6 +10,9 @@ import { PrismaJobRepository } from './job/prisma-job.repository';
 import { JobProcessorModule } from './job-processor/job-processor.module';
 import { JobConsumerModule } from './job-consumer/job-consumer.module';
 
+const allowedOrigins: string = process.env.ALLOWED_ORIGINS || '';
+const allowedOriginsArray: string[] = allowedOrigins.split(',');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,7 +38,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(
         cors({
-          origin: 'http://localhost:3001',
+          origin: allowedOriginsArray,
           methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
           credentials: true,
         }),
