@@ -13,9 +13,9 @@ import { Queue } from 'bull';
 import * as NodeCache from 'node-cache';
 
 interface getJobsParams {
-  results_per_page: number;
-  what: string;
-  where: string;
+  results_per_page?: number;
+  what?: string;
+  where?: string;
   force_update?: string;
 }
 
@@ -76,6 +76,8 @@ export class JobService {
   async getJobs(params: getJobsParams): Promise<JobDbResponse[]> {
     const { results_per_page, what, where, force_update } = params;
 
+    Logger.log(`Params: ${JSON.stringify(params)}`, 'JobService');
+
     const cacheKey = this.getJobsCacheKey(params);
 
     // Check if force_update flag is set, if true, clear the cache
@@ -103,6 +105,19 @@ export class JobService {
       // store the job listings in the cache
       this.cache.set(cacheKey, jobListings);
 
+      return jobListings;
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+      return [];
+    }
+  }
+
+  // url: /api/v1/jobs?results_per_page=[number]
+  // get specific number of recent jobs from database
+  async recentJobs(results_per_page: number): Promise<JobDbResponse[]> {
+    try {
+      const jobListings = await this.jobRepository.findRecent(results_per_page);
+      Logger.log(`${jobListings.length} job(s) found`, 'JobService');
       return jobListings;
     } catch (error) {
       Logger.error(`~ ${error.message}`);

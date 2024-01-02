@@ -58,18 +58,26 @@ export class JobController {
       force_update = 'false';
     }
 
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined) {
+        query[key] = value;
+      } else {
+        delete query[key];
+      }
+    }
+
     if (
       results_per_page !== undefined &&
       what !== undefined &&
       where !== undefined
     ) {
       // If all params are present, go to getJobs method
-      const jobs = await this.jobService.getJobs({
-        results_per_page,
-        what,
-        where,
-        force_update,
-      });
+      const jobs = await this.jobService.getJobs(query);
+      const response = new ResponseDTO(jobs, jobs.length);
+      return response;
+    } else if (results_per_page !== undefined) {
+      // if only results_per_page is present, go to recentJobs method
+      const jobs = await this.jobService.recentJobs(results_per_page);
       const response = new ResponseDTO(jobs, jobs.length);
       return response;
     } else {
