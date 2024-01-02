@@ -16,6 +16,7 @@ export interface JobRepository {
     take: number,
   ): Promise<Job[]>;
   findAll(): Promise<Job[]>;
+  findRecent(take: number): Promise<Job[]>;
   updateById(id: string, data: Partial<Job>): Promise<Job | null>;
   deleteById(id: string): Promise<Job | null>;
   getKeywords(id: string): Promise<string[]>;

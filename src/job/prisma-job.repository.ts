@@ -53,6 +53,15 @@ export class PrismaJobRepository implements JobRepository {
     return this.prisma.job.findMany();
   }
 
+  async findRecent(take: number): Promise<Job[]> {
+    return this.prisma.job.findMany({
+      take: parseInt(take.toString()),
+      orderBy: {
+        created: 'desc',
+      },
+    });
+  }
+
   async updateById(id: string, data: Partial<Job>): Promise<Job | null> {
     return this.prisma.job.update({
       where: { id: parseInt(id) },
