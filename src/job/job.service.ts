@@ -39,6 +39,10 @@ export class JobService {
     return `getJobs-${results_per_page}-${what}-${where}`;
   };
 
+  getRecentJobsCacheKey = (results_per_page: number): string => {
+    return `getRecentJobs-${results_per_page}`;
+  };
+
   getAllJobsCacheKey = (): string => {
     return `getAllJobs`;
   };
@@ -114,10 +118,31 @@ export class JobService {
 
   // url: /api/v1/jobs?results_per_page=[number]
   // get specific number of recent jobs from database
-  async recentJobs(results_per_page: number): Promise<JobDbResponse[]> {
+  async recentJobs(
+    results_per_page: number,
+    force_update?: string,
+  ): Promise<JobDbResponse[]> {
+    const cacheKey = this.getRecentJobsCacheKey(results_per_page);
+
+    // Check if force_update flag is set, if true, clear the cache
+    if (force_update === 'true') {
+      this.cache.del(cacheKey);
+      Logger.log(`Cache cleared for top keywords`, 'JobService');
+    }
+
+    const cachedJobs = this.cache.get(cacheKey);
+
+    if (cachedJobs) {
+      Logger.log(`Retrieved jobs from cache`, 'JobService');
+      return cachedJobs as JobDbResponse[];
+    }
+
     try {
       const jobListings = await this.jobRepository.findRecent(results_per_page);
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
+
+      this.cache.set(cacheKey, jobListings);
+
       return jobListings;
     } catch (error) {
       Logger.error(`~ ${error.message}`);

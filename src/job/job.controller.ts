@@ -77,7 +77,10 @@ export class JobController {
       return response;
     } else if (results_per_page !== undefined) {
       // if only results_per_page is present, go to recentJobs method
-      const jobs = await this.jobService.recentJobs(results_per_page);
+      const jobs = await this.jobService.recentJobs(
+        results_per_page,
+        force_update,
+      );
       const response = new ResponseDTO(jobs, jobs.length);
       return response;
     } else {
