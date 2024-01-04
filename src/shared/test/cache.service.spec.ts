@@ -1,6 +1,7 @@
 import { TestingModule, Test } from '@nestjs/testing';
 import { CacheService } from '../cache.service';
 import { JobDbResponse } from 'src/job/types/job.interface';
+import NodeCache from 'node-cache';
 
 describe('CacheService', () => {
   const data: JobDbResponse = {
@@ -26,10 +27,6 @@ describe('CacheService', () => {
           useValue: 'test',
         },
         {
-          provide: 'CacheKeySuffix',
-          useValue: 'test',
-        },
-        {
           provide: 'TTL',
           useValue: 1000,
         },
@@ -44,72 +41,70 @@ describe('CacheService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('test instance', () => {
-    it('should have a cache property', () => {
-      expect(service.cache).toBeDefined();
-    });
-
-    it('should have a key property', () => {
-      expect(service.key).toBe('test-test');
-    });
-  });
-
-  describe('test instance with JobDbResponse data', () => {
+  describe('single test cache', () => {
     beforeEach(() => {
-      service.setCache<JobDbResponse>(data);
+      service.createCache('test');
+      service.setCache('test', data);
     });
 
-    it('should have cached object', () => {
-      const cachedObject = service.getCache<JobDbResponse>();
-      expect(cachedObject).toBeInstanceOf(Object);
-      expect(cachedObject.id).toBe(1234);
+    afterAll(() => {
+      service.clearAllCaches();
     });
 
-    it('should be possible to set a new cached object', () => {
-      const newData: JobDbResponse = { ...data, id: 9999, title: 'new data' };
-      service.setCache<JobDbResponse>(newData);
-
-      const cachedObject = service.getCache<JobDbResponse>();
-      expect(cachedObject).toBeInstanceOf(Object);
-      expect(cachedObject.id).toBe(9999);
+    it('should have a caches property', () => {
+      expect(service.getAllCaches()).toBeInstanceOf(Map<string, NodeCache>);
     });
 
-    it('should be deletable', () => {
-      service.deleteCache(service.key);
-      const cachedObject = service.getCache<JobDbResponse>();
-      expect(cachedObject).toBeUndefined();
-    });
-  });
-
-  describe('test instance with JobDbResponse[] data', () => {
-    const arrayData: JobDbResponse[] = [{ ...data }, { ...data }, { ...data }];
-
-    beforeEach(() => {
-      service.setCache<JobDbResponse[]>(arrayData);
+    it('should have a keys property', () => {
+      const lastKey = service.getAllCacheKeys().at(-1);
+      expect(lastKey).toBe('test');
     });
 
-    it('should have cached array', () => {
-      const cachedArray = service.getCache<JobDbResponse[]>();
-      expect(cachedArray).toBeInstanceOf(Array);
-      expect(cachedArray.length).toBe(3);
+    it('should have a getCache method', () => {
+      const cache = service.getCache('test');
+      expect(cache).toBe(data);
     });
 
-    it('should be possible to set a new cached array', () => {
-      const newData: JobDbResponse[] = [
-        { ...data, id: 9999, title: 'new data' },
-      ];
-      service.setCache<JobDbResponse[]>(newData);
+    describe('setting caches', () => {
+      it('should be possible to overwrite a cache', () => {
+        const newData = { ...data, title: 'new test' };
+        service.setCache('test', newData);
+        const cache = service.getCache('test');
+        expect(cache).toBe(newData);
+      });
 
-      const cachedArray = service.getCache<JobDbResponse[]>();
-      expect(cachedArray).toBeInstanceOf(Array);
-      expect(cachedArray.length).toBe(1);
-      expect(cachedArray[0].id).toBe(9999);
+      it('should be possible to add a new cache', () => {
+        service.createCache('test2');
+        service.setCache('test2', data);
+        const cache = service.getCache('test2');
+        expect(cache).toBe(data);
+      });
     });
 
-    it('should be deletable', () => {
-      service.deleteCache(service.key);
-      const cachedArray = service.getCache<JobDbResponse[]>();
-      expect(cachedArray).toBeUndefined();
+    describe('deleting caches', () => {
+      it('should be possible to delete a cache', () => {
+        const deleted = service.deleteCache('test');
+        expect(deleted).toBe(true);
+      });
+
+      it('there should be one less cache after deleting a cache', () => {
+        const totalCaches = service.getAllCaches().size;
+        const totalCacheKeys = service.getAllCacheKeys().length;
+
+        service.deleteCache('test');
+
+        const newTotalCaches = service.getAllCaches().size;
+        const newTotalCacheKeys = service.getAllCacheKeys().length;
+
+        expect(newTotalCaches).toBe(totalCaches - 1);
+        expect(newTotalCacheKeys).toBe(totalCacheKeys - 1);
+      });
+    });
+
+    it('should be possible to clear all caches', () => {
+      service.clearAllCaches();
+      expect(service.getAllCacheKeys().length).toBe(0);
+      expect(service.getAllCaches().size).toBe(0);
     });
   });
 });

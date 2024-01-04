@@ -7,7 +7,7 @@ describe('CacheModule', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [CacheModule.forRoot('test', 'test', 1000)],
+      imports: [CacheModule.forRoot('test', 1000)],
     }).compile();
   });
 
@@ -24,11 +24,6 @@ describe('CacheModule', () => {
 
     it('should provide the CacheKeyPrefix', () => {
       const service = module.get('CacheKeyPrefix');
-      expect(service).toBeDefined();
-    });
-
-    it('should provide the CacheKeySuffix', () => {
-      const service = module.get('CacheKeySuffix');
       expect(service).toBeDefined();
     });
 

@@ -6,21 +6,13 @@ import { CacheService } from './cache.service';
   exports: [CacheService],
 })
 export class CacheModule {
-  static forRoot(
-    cacheKeyPrefix: string,
-    cacheKeySuffix: string,
-    ttl: number,
-  ): DynamicModule {
+  static forRoot(cacheKeyPrefix: string, ttl: number): DynamicModule {
     return {
       module: CacheModule,
       providers: [
         {
           provide: 'CacheKeyPrefix',
           useValue: cacheKeyPrefix,
-        },
-        {
-          provide: 'CacheKeySuffix',
-          useValue: cacheKeySuffix,
         },
         {
           provide: 'TTL',
