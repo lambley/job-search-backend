@@ -2,6 +2,8 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { CacheService } from '../cache.service';
 import { JobDbResponse } from 'src/job/types/job.interface';
 import NodeCache from 'node-cache';
+import { after, before } from 'node:test';
+import exp from 'node:constants';
 
 describe('CacheService', () => {
   const data: JobDbResponse = {
@@ -105,6 +107,54 @@ describe('CacheService', () => {
       service.clearAllCaches();
       expect(service.getAllCacheKeys().length).toBe(0);
       expect(service.getAllCaches().size).toBe(0);
+    });
+  });
+
+  describe('multiple test caches', () => {
+    beforeEach(() => {
+      service.createCache('test');
+      service.createCache('test2');
+      service.setCache('test', data);
+      service.setCache('test2', data);
+    });
+
+    afterEach(() => {
+      service.clearAllCaches();
+    });
+
+    it('should be possible to get all caches', () => {
+      const caches = service.getAllCaches();
+      expect(caches.size).toBe(2);
+    });
+
+    it('should be possible to get all cache keys', () => {
+      const keys = service.getAllCacheKeys();
+      expect(keys.length).toBe(2);
+    });
+
+    it('each cache should contain the correct data', () => {
+      const cache = service.getCache('test');
+      const cache2 = service.getCache('test2');
+      expect(cache).toBe(data);
+      expect(cache2).toBe(data);
+    });
+
+    it('should be possible to delete a single cache', () => {
+      const TotalCaches = service.getAllCaches().size;
+      const totalCacheKeys = service.getAllCacheKeys().length;
+
+      service.deleteCache('test');
+
+      const newTotalCaches = service.getAllCaches().size;
+      const newTotalCacheKeys = service.getAllCacheKeys().length;
+      expect(newTotalCaches).toBe(TotalCaches - 1);
+      expect(newTotalCacheKeys).toBe(totalCacheKeys - 1);
+    });
+
+    it('clearing all caches should remove all caches', () => {
+      service.clearAllCaches();
+      expect(service.getAllCaches().size).toBe(0);
+      expect(service.getAllCacheKeys().length).toBe(0);
     });
   });
 });
