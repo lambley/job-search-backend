@@ -2,6 +2,15 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import * as NodeCache from 'node-cache';
 
+/*
+CacheService is a wrapper around the node-cache library. It provides a way to create multiple caches
+
+Each cache is stored in a Map with a key of the cacheKeyPrefix + cacheKey. The cacheKeyPrefix is unique to the service that uses the cache and intended to be unique for the method that uses that cache.
+
+e.g. the JobService uses the cacheKeyPrefix 'job' and the method that uses the cache is 'getJobs'. The cacheKeyPrefix and cacheKey are combined to create the key 'job-getJobs' which is used to store the cache in the Map.
+
+Cache keys can be more granular e.g. 'job-getJobs-1' and 'job-getJobs-2' if the method has multiple cacheable results. But for now the numbering is handled by the JobService, rather than the CacheService.
+*/
 @Injectable()
 export class CacheService {
   private caches: Map<string, NodeCache>;
@@ -20,10 +29,11 @@ export class CacheService {
 
   public createCache(cacheKey: string): void {
     const newCache = new NodeCache({ stdTTL: this.ttl });
-    this.caches.set(cacheKey, newCache);
+    const key = `${this.cacheKeyPrefix}-${cacheKey}`;
+    this.caches.set(key, newCache);
 
-    // add cacheKey to cacheKeys
-    this.cacheKeys.push(cacheKey);
+    // add key to cacheKeys
+    this.cacheKeys.push(key);
     // remove duplicates from cacheKeys
     this.cacheKeys = [...new Set(this.cacheKeys)];
   }
@@ -37,25 +47,28 @@ export class CacheService {
   }
 
   public getCache<T>(cacheKey: string): T | undefined {
-    return this.caches.get(cacheKey) as T;
+    const key = `${this.cacheKeyPrefix}-${cacheKey}`;
+    return this.caches.get(key) as T;
   }
 
   public setCache(cacheKey: string, data: any): void {
-    this.caches.set(cacheKey, data);
+    const key = `${this.cacheKeyPrefix}-${cacheKey}`;
+    this.caches.set(key, data);
   }
 
   public deleteCache(cacheKey: string): boolean {
-    if (this.cacheKeys.includes(cacheKey)) {
+    const key = `${this.cacheKeyPrefix}-${cacheKey}`;
+    if (this.cacheKeys.includes(key)) {
       try {
-        this.caches.delete(cacheKey);
-        this.cacheKeys = this.cacheKeys.filter((key) => key !== cacheKey);
+        this.caches.delete(key);
+        this.cacheKeys = this.cacheKeys.filter((cacheKey) => cacheKey !== key);
         return true;
       } catch (error) {
-        Logger.log(`Error deleting cache with key ${cacheKey}: ${error}`);
+        Logger.log(`Error deleting cache with key ${key}: ${error}`);
         return false;
       }
     } else {
-      Logger.log(`Cache with key ${cacheKey} does not exist`);
+      Logger.log(`Cache with key ${key} does not exist`);
       return false;
     }
   }

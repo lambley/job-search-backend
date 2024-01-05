@@ -2,8 +2,6 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { CacheService } from '../cache.service';
 import { JobDbResponse } from 'src/job/types/job.interface';
 import NodeCache from 'node-cache';
-import { after, before } from 'node:test';
-import exp from 'node:constants';
 
 describe('CacheService', () => {
   const data: JobDbResponse = {
@@ -26,7 +24,7 @@ describe('CacheService', () => {
       providers: [
         {
           provide: 'CacheKeyPrefix',
-          useValue: 'test',
+          useValue: 'test-prefix',
         },
         {
           provide: 'TTL',
@@ -59,7 +57,7 @@ describe('CacheService', () => {
 
     it('should have a keys property', () => {
       const lastKey = service.getAllCacheKeys().at(-1);
-      expect(lastKey).toBe('test');
+      expect(lastKey).toBe(`test-prefix-test`);
     });
 
     it('should have a getCache method', () => {
@@ -76,9 +74,9 @@ describe('CacheService', () => {
       });
 
       it('should be possible to add a new cache', () => {
-        service.createCache('test2');
-        service.setCache('test2', data);
-        const cache = service.getCache('test2');
+        service.createCache('test-prefix-test2');
+        service.setCache('test-prefix-test2', data);
+        const cache = service.getCache('test-prefix-test2');
         expect(cache).toBe(data);
       });
     });
@@ -112,10 +110,10 @@ describe('CacheService', () => {
 
   describe('multiple test caches', () => {
     beforeEach(() => {
-      service.createCache('test');
-      service.createCache('test2');
-      service.setCache('test', data);
-      service.setCache('test2', data);
+      service.createCache('test-prefix-test');
+      service.createCache('test-prefix-test2');
+      service.setCache('test-prefix-test', data);
+      service.setCache('test-prefix-test2', data);
     });
 
     afterEach(() => {
@@ -133,8 +131,8 @@ describe('CacheService', () => {
     });
 
     it('each cache should contain the correct data', () => {
-      const cache = service.getCache('test');
-      const cache2 = service.getCache('test2');
+      const cache = service.getCache('test-prefix-test');
+      const cache2 = service.getCache('test-prefix-test2');
       expect(cache).toBe(data);
       expect(cache2).toBe(data);
     });
@@ -143,7 +141,7 @@ describe('CacheService', () => {
       const TotalCaches = service.getAllCaches().size;
       const totalCacheKeys = service.getAllCacheKeys().length;
 
-      service.deleteCache('test');
+      service.deleteCache('test-prefix-test');
 
       const newTotalCaches = service.getAllCaches().size;
       const newTotalCacheKeys = service.getAllCacheKeys().length;
