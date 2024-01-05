@@ -8,6 +8,7 @@ import {
   jobDbResultsFactory,
 } from './factories/jobFactory';
 import { ConfigService } from '@nestjs/config';
+import { CacheService } from '../../shared/cache.service';
 import { PrismaJobRepository } from '../prisma-job.repository';
 import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
 import { getQueueToken } from '@nestjs/bull';
@@ -32,6 +33,17 @@ describe('JobController', () => {
         {
           provide: getQueueToken('jobQueue'),
           useValue: mockQueue,
+        },
+        {
+          provide: CacheService,
+          useValue: {
+            createCache: jest.fn(),
+            setCache: jest.fn(),
+            getCache: jest.fn(),
+            getAllCaches: jest.fn(),
+            getAllCacheKeys: jest.fn(),
+            clearAllCaches: jest.fn(),
+          },
         },
       ],
     })

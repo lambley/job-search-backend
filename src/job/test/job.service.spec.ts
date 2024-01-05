@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobService } from '../job.service';
 import { ConfigService } from '@nestjs/config';
+import { CacheService } from '../../shared/cache.service';
 import {
   jobResultArrayFactory,
   jobResultFactory,
@@ -18,16 +19,6 @@ const mockQueue = {
   add: jest.fn(),
 };
 
-jest.mock('node-cache', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-    };
-  });
-});
-
 const params = {
   results_per_page: 10,
   what: 'developer',
@@ -36,6 +27,7 @@ const params = {
 
 describe('JobService', () => {
   let service: JobService;
+  let cacheService: CacheService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,6 +39,18 @@ describe('JobService', () => {
           provide: getQueueToken('jobQueue'),
           useValue: mockQueue,
         },
+        {
+          provide: CacheService,
+          useFactory: () => ({
+            createCache: jest.fn(),
+            getAllCaches: jest.fn(),
+            getAllCacheKeys: jest.fn(),
+            getCache: jest.fn(),
+            setCache: jest.fn(),
+            deleteCache: jest.fn(),
+            clearCache: jest.fn(),
+          }),
+        },
       ],
     })
       .overrideProvider(PrismaJobRepository)
@@ -54,6 +58,7 @@ describe('JobService', () => {
       .compile();
 
     service = module.get<JobService>(JobService);
+    cacheService = module.get<CacheService>(CacheService);
 
     jest.clearAllMocks();
   });
@@ -134,15 +139,13 @@ describe('JobService', () => {
     it('should get jobs from the cache if available', async () => {
       const mockCacheResponse = jobResultArrayFactory(params.results_per_page);
 
-      service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+      cacheService.getCache = jest.fn().mockReturnValue(mockCacheResponse);
 
       await service.getJobs(params);
 
-      expect(service.cache.get).toHaveBeenCalledWith(
-        `getJobs-${params.results_per_page}-${params.what}-${params.where}`,
-      );
-      expect(service.cache.get).toHaveBeenCalledTimes(1);
-      expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+      expect(cacheService.getCache).toHaveBeenCalledWith('getJobs');
+      expect(cacheService.getCache).toHaveBeenCalledTimes(1);
+      expect(cacheService.getCache).toHaveReturnedWith(mockCacheResponse);
     });
 
     it('should fetch jobs from the database if not in the cache', async () => {
@@ -234,7 +237,10 @@ describe('JobService', () => {
         expect(result).toBeInstanceOf(Array);
         expect(result.length).toEqual(2);
 
-        expect(service.cache.set).toHaveBeenCalledWith('getAllJobs', result);
+        expect(cacheService.setCache).toHaveBeenCalledWith(
+          `getAllJobs`,
+          mockDbResponse,
+        );
       });
     });
 
@@ -434,15 +440,15 @@ describe('JobService', () => {
       it('should return an array of keywords of default length', async () => {
         const mockCacheResponse = mockResponse.slice(0, defaultLimit);
 
-        service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+        cacheService.getCache = jest.fn().mockReturnValue(mockCacheResponse);
 
         const result = await service.getTopKeywords();
 
-        expect(service.cache.get).toHaveBeenCalledWith(
+        expect(cacheService.getCache).toHaveBeenCalledWith(
           `getTopKeywords-${defaultLimit}`,
         );
-        expect(service.cache.get).toHaveBeenCalledTimes(1);
-        expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+        expect(cacheService.getCache).toHaveBeenCalledTimes(1);
+        expect(cacheService.getCache).toHaveReturnedWith(mockCacheResponse);
 
         expect(result).toBeInstanceOf(Array);
         expect(result.length).toEqual(defaultLimit);
@@ -452,15 +458,15 @@ describe('JobService', () => {
       it('should return an array of keywords of specified length', async () => {
         const mockCacheResponse = mockResponse.slice(0, limit);
 
-        service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+        cacheService.getCache = jest.fn().mockReturnValue(mockCacheResponse);
 
         const result = await service.getTopKeywords(limit);
 
-        expect(service.cache.get).toHaveBeenCalledWith(
+        expect(cacheService.getCache).toHaveBeenCalledWith(
           `getTopKeywords-${limit}`,
         );
-        expect(service.cache.get).toHaveBeenCalledTimes(1);
-        expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+        expect(cacheService.getCache).toHaveBeenCalledTimes(1);
+        expect(cacheService.getCache).toHaveReturnedWith(mockCacheResponse);
 
         expect(result).toBeInstanceOf(Array);
         expect(result.length).toEqual(limit);
@@ -471,15 +477,15 @@ describe('JobService', () => {
       it('should return an array of keywords from the cache', async () => {
         const mockCacheResponse = mockResponse.slice(0, limit);
 
-        service.cache.get = jest.fn().mockReturnValue(mockCacheResponse);
+        cacheService.getCache = jest.fn().mockReturnValue(mockCacheResponse);
 
         const result = await service.getTopKeywords(limit);
 
-        expect(service.cache.get).toHaveBeenCalledWith(
+        expect(cacheService.getCache).toHaveBeenCalledWith(
           `getTopKeywords-${limit}`,
         );
-        expect(service.cache.get).toHaveBeenCalledTimes(1);
-        expect(service.cache.get).toHaveReturnedWith(mockCacheResponse);
+        expect(cacheService.getCache).toHaveBeenCalledTimes(1);
+        expect(cacheService.getCache).toHaveReturnedWith(mockCacheResponse);
 
         expect(result).toBeInstanceOf(Array);
         expect(result.length).toEqual(limit);

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CacheService } from '../shared/cache.service';
 import axios from 'axios';
 import {
   JobResponse,
@@ -10,7 +11,6 @@ import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from './prisma-job.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import * as NodeCache from 'node-cache';
 
 interface getJobsParams {
   results_per_page?: number;
@@ -25,31 +25,33 @@ export class JobService {
     private configService: ConfigService,
     private readonly jobRepository: PrismaJobRepository,
     @InjectQueue('jobQueue') private readonly jobQueue: Queue,
+    private readonly cacheService: CacheService,
   ) {}
 
-  // Create a cache to store the job listings for 1 hour to reduce the number of API calls
-  cache = new NodeCache({ stdTTL: 3600 });
+  app_id: string = this.configService.get<string>('ADZUNA_APP_ID');
+  app_key: string = this.configService.get<string>('ADZUNA_API_KEY');
 
-  app_id = this.configService.get<string>('ADZUNA_APP_ID');
-  app_key = this.configService.get<string>('ADZUNA_API_KEY');
+  private handleCache(cacheName: string): void {
+    try {
+      const cleared = this.cacheService.clearCache(cacheName);
+      cleared
+        ? Logger.log(`Cache cleared for ${cacheName}`, 'JobService')
+        : Logger.log(
+            `Cannot clear cache - Cache ${cacheName} not found`,
+            'JobService',
+          );
+    } catch (error) {
+      Logger.error(`Error clearing cache for ${cacheName}`, 'JobService');
+    }
+  }
 
-  // cache keys
-  getJobsCacheKey = (params: getJobsParams): string => {
-    const { results_per_page, what, where } = params;
-    return `getJobs-${results_per_page}-${what}-${where}`;
-  };
+  private checkCacheExists(cacheName: string): boolean {
+    if (this.cacheService.getAllCaches() === undefined) {
+      return false;
+    }
 
-  getRecentJobsCacheKey = (results_per_page: number): string => {
-    return `getRecentJobs-${results_per_page}`;
-  };
-
-  getAllJobsCacheKey = (): string => {
-    return `getAllJobs`;
-  };
-
-  getTopKeywordsCacheKey = (limit: number): string => {
-    return `getTopKeywords-${limit}`;
-  };
+    return this.cacheService.getAllCaches().has(cacheName);
+  }
 
   // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
   // refresh jobs from API
@@ -80,18 +82,13 @@ export class JobService {
   async getJobs(params: getJobsParams): Promise<JobDbResponse[]> {
     const { results_per_page, what, where, force_update } = params;
 
-    Logger.log(`Params: ${JSON.stringify(params)}`, 'JobService');
-
-    const cacheKey = this.getJobsCacheKey(params);
-
     // Check if force_update flag is set, if true, clear the cache
     if (force_update === 'true') {
-      this.cache.del(cacheKey);
-      Logger.log(`Cache cleared for top keywords`, 'JobService');
+      this.handleCache('getJobs');
     }
 
     // check if the cache already has the job listings
-    const cachedJobs = this.cache.get(cacheKey);
+    const cachedJobs = this.cacheService.getCache<JobDbResponse[]>('getJobs');
 
     if (cachedJobs) {
       Logger.log(`Retrieved jobs from cache`, 'JobService');
@@ -107,7 +104,7 @@ export class JobService {
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
       // store the job listings in the cache
-      this.cache.set(cacheKey, jobListings);
+      this.cacheService.setCache('getJobs', jobListings);
 
       return jobListings;
     } catch (error) {
@@ -122,15 +119,13 @@ export class JobService {
     results_per_page: number,
     force_update?: string,
   ): Promise<JobDbResponse[]> {
-    const cacheKey = this.getRecentJobsCacheKey(results_per_page);
-
     // Check if force_update flag is set, if true, clear the cache
     if (force_update === 'true') {
-      this.cache.del(cacheKey);
-      Logger.log(`Cache cleared for top keywords`, 'JobService');
+      this.handleCache('recentJobs');
     }
 
-    const cachedJobs = this.cache.get(cacheKey);
+    const cachedJobs =
+      this.cacheService.getCache<JobDbResponse[]>('recentJobs');
 
     if (cachedJobs) {
       Logger.log(`Retrieved jobs from cache`, 'JobService');
@@ -141,7 +136,8 @@ export class JobService {
       const jobListings = await this.jobRepository.findRecent(results_per_page);
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
-      this.cache.set(cacheKey, jobListings);
+      // store the job listings in the cache
+      this.cacheService.setCache('recentJobs', jobListings);
 
       return jobListings;
     } catch (error) {
@@ -153,16 +149,14 @@ export class JobService {
   // url: /api/v1/jobs
   // get all jobs from database - when no params are present
   async getAllJobs(force_update?: string): Promise<JobDbResponse[]> {
-    const cacheKey = this.getAllJobsCacheKey();
-
     // Check if force_update flag is set, if true, clear the cache
     if (force_update === 'true') {
-      this.cache.del(cacheKey);
-      Logger.log(`Cache cleared for top keywords`, 'JobService');
+      this.handleCache('getAllJobs');
     }
 
     // check if the cache already has the job listings
-    const cachedJobs = this.cache.get(cacheKey);
+    const cachedJobs =
+      this.cacheService.getCache<JobDbResponse[]>('getAllJobs');
 
     if (cachedJobs) {
       Logger.log(`Retrieved jobs from cache`, 'JobService');
@@ -174,7 +168,7 @@ export class JobService {
       Logger.log(`${jobListings.length} job(s) found`, 'JobService');
 
       // store the job listings in the cache
-      this.cache.set(cacheKey, jobListings);
+      this.cacheService.setCache('getAllJobs', jobListings);
 
       return jobListings;
     } catch (error) {
@@ -253,13 +247,12 @@ export class JobService {
 
     // Check if force_update flag is set, if true, clear the cache
     if (force_update === 'true') {
-      this.cache.del(this.getTopKeywordsCacheKey(limit));
-      Logger.log(`Cache cleared for top keywords`, 'JobService');
+      this.handleCache(`getTopKeywords-${limit}`);
     }
 
     // check if the cache already has the Top Keywords
-    const cachedKeywords: string[] = this.cache.get(
-      this.getTopKeywordsCacheKey(limit),
+    const cachedKeywords: string[] = this.cacheService.getCache(
+      `getTopKeywords-${limit}`,
     );
 
     if (cachedKeywords) {
@@ -270,8 +263,11 @@ export class JobService {
     try {
       // get all the job listings
       let allJobs: JobDbResponse[] = [];
-      if (this.cache.get(this.getAllJobsCacheKey())) {
-        allJobs = this.cache.get(this.getAllJobsCacheKey());
+      const getAllJobsCacheExists: boolean =
+        this.checkCacheExists('getAllJobs');
+
+      if (getAllJobsCacheExists) {
+        allJobs = this.cacheService.getCache<JobDbResponse[]>('getAllJobs');
         Logger.log(`Retrieved jobs from cache`, 'JobService');
       } else {
         allJobs = await this.jobRepository.findAll();
@@ -299,7 +295,7 @@ export class JobService {
       const topKeywords = sortedKeywords.slice(0, limit);
 
       // store the job listings in the cache
-      this.cache.set(this.getTopKeywordsCacheKey(limit), topKeywords);
+      this.cacheService.setCache(`getTopKeywords-${limit}`, topKeywords);
 
       return topKeywords;
     } catch (error) {
