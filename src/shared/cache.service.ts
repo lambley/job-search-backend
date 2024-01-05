@@ -53,6 +53,9 @@ export class CacheService {
 
   public setCache(cacheKey: string, data: any): void {
     const key = `${this.cacheKeyPrefix}-${cacheKey}`;
+
+    if (!this.caches.has(key)) this.createCache(cacheKey);
+
     this.caches.set(key, data);
   }
 
@@ -69,6 +72,17 @@ export class CacheService {
       }
     } else {
       Logger.log(`Cache with key ${key} does not exist`);
+      return false;
+    }
+  }
+
+  public clearCache(cacheKey: string): boolean {
+    const key = `${this.cacheKeyPrefix}-${cacheKey}`;
+    try {
+      this.caches.set(key, undefined);
+      return true;
+    } catch (error) {
+      Logger.log(`Error clearing cache with key ${key}: ${error}`);
       return false;
     }
   }
