@@ -9,6 +9,7 @@ import { JobService } from './job/job.service';
 import { PrismaJobRepository } from './job/prisma-job.repository';
 import { JobProcessorModule } from './job-processor/job-processor.module';
 import { JobConsumerModule } from './job-consumer/job-consumer.module';
+import { CacheModule } from './shared/cache.module';
 
 const allowedOrigins: string = process.env.ALLOWED_ORIGINS || '';
 const allowedOriginsArray: string[] = allowedOrigins.split(',');
@@ -30,6 +31,7 @@ const allowedOriginsArray: string[] = allowedOrigins.split(',');
     JobModule,
     JobProcessorModule,
     JobConsumerModule,
+    CacheModule.forRoot('app', 3600), // 1 hour cache
   ],
   providers: [JobService, PrismaService, PrismaJobRepository],
 })

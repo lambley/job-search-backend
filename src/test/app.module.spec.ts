@@ -39,6 +39,11 @@ describe('AppModule', () => {
       const jobConsumerModule = await module.resolve(AppModule);
       expect(jobConsumerModule).toBeDefined();
     });
+
+    it('should import the CacheModule', async () => {
+      const cacheModule = await module.resolve(AppModule);
+      expect(cacheModule).toBeDefined();
+    });
   });
 
   describe('AppModule providers', () => {

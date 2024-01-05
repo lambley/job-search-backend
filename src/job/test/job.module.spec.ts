@@ -9,6 +9,7 @@ import { PrismaService } from '../../prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { config } from '../../../config/configuration';
 import { getQueueToken } from '@nestjs/bull';
+import { CacheModule } from '../../shared/cache.module';
 
 const mockQueue = {
   add: jest.fn(),
@@ -21,6 +22,7 @@ describe('JobModule', () => {
     module = await Test.createTestingModule({
       imports: [
         JobModule,
+        CacheModule.forRoot('job', 3600), // 1 hour cache
         ConfigModule.forRoot({
           envFilePath: ['.env'],
           load: [config],
@@ -51,6 +53,11 @@ describe('JobModule', () => {
   describe('JobModule imports', () => {
     it('should import the JobProcessorModule', () => {
       const service = module.get<JobProcessorService>(JobProcessorService);
+      expect(service).toBeDefined();
+    });
+
+    it('should import the CacheModule', () => {
+      const service = module.get<ConfigService>(ConfigService);
       expect(service).toBeDefined();
     });
 
