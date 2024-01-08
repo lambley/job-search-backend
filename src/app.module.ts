@@ -24,7 +24,7 @@ const allowedOriginsArray: string[] = allowedOrigins.split(',');
     BullModule.forRoot({
       // local config - change later
       redis: {
-        host: 'redis-server',
+        host: process.env.REDIS_HOST || 'localhost',
         port: 6379,
       },
     }),
