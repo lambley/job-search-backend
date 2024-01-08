@@ -31,28 +31,6 @@ export class JobService {
   app_id: string = this.configService.get<string>('ADZUNA_APP_ID');
   app_key: string = this.configService.get<string>('ADZUNA_API_KEY');
 
-  private handleCache(cacheName: string): void {
-    try {
-      const cleared = this.cacheService.clearCache(cacheName);
-      cleared
-        ? Logger.log(`Cache cleared for ${cacheName}`, 'JobService')
-        : Logger.log(
-            `Cannot clear cache - Cache ${cacheName} not found`,
-            'JobService',
-          );
-    } catch (error) {
-      Logger.error(`Error clearing cache for ${cacheName}`, 'JobService');
-    }
-  }
-
-  private checkCacheExists(cacheName: string): boolean {
-    if (this.cacheService.getAllCaches() === undefined) {
-      return false;
-    }
-
-    return this.cacheService.getAllCaches().has(cacheName);
-  }
-
   // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
   // refresh jobs from API
   async refreshJobs(params: getJobsParams): Promise<JobResponse[]> {
@@ -314,30 +292,61 @@ export class JobService {
 
         // Add the job description to the processing queue
         try {
-          await this.jobQueue.add(
-            'processJob',
-            {
-              description,
-              id,
-              adzuna_id,
-            },
-            {
-              timeout: 10000,
-              attempts: 3,
-              backoff: {
-                type: 'exponential',
-                delay: 1000,
-              },
-            },
-          );
-          Logger.log(
-            `Added job ${job.title} to the processing queue`,
-            'JobService',
-          );
+          this.addToProcessingQueue(description, id.toString(), adzuna_id);
         } catch (error) {
           Logger.error(`~ ${error.message}`);
         }
       }
+    } catch (error) {
+      Logger.error(`~ ${error.message}`);
+    }
+  }
+
+  private handleCache(cacheName: string): void {
+    try {
+      const cleared = this.cacheService.clearCache(cacheName);
+      cleared
+        ? Logger.log(`Cache cleared for ${cacheName}`, 'JobService')
+        : Logger.log(
+            `Cannot clear cache - Cache ${cacheName} not found`,
+            'JobService',
+          );
+    } catch (error) {
+      Logger.error(`Error clearing cache for ${cacheName}`, 'JobService');
+    }
+  }
+
+  private checkCacheExists(cacheName: string): boolean {
+    if (this.cacheService.getAllCaches() === undefined) {
+      return false;
+    }
+
+    return this.cacheService.getAllCaches().has(cacheName);
+  }
+
+  private async addToProcessingQueue(
+    description: string,
+    id: string,
+    adzuna_id: string,
+  ): Promise<void> {
+    try {
+      await this.jobQueue.add(
+        'processJob',
+        {
+          description,
+          id,
+          adzuna_id,
+        },
+        {
+          timeout: 10000,
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 1000,
+          },
+        },
+      );
+      Logger.log(`Added job to the processing queue`, 'JobService');
     } catch (error) {
       Logger.error(`~ ${error.message}`);
     }
@@ -387,25 +396,10 @@ export class JobService {
 
         // Add the job description to the processing queue
         try {
-          await this.jobQueue.add(
-            'processJob',
-            {
-              description: newJob.description,
-              id: newJob.id,
-              adzuna_id: newJob.adzuna_id,
-            },
-            {
-              timeout: 10000,
-              attempts: 3,
-              backoff: {
-                type: 'exponential',
-                delay: 1000,
-              },
-            },
-          );
-          Logger.log(
-            `Added job ${newJob.title} to the processing queue`,
-            'JobService',
+          this.addToProcessingQueue(
+            newJob.description,
+            newJob.id.toString(),
+            newJob.adzuna_id,
           );
         } catch (error) {
           Logger.error(`~ ${error.message}`);

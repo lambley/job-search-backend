@@ -1,25 +1,7 @@
 import { Processor, Process } from '@nestjs/bull';
 import { JobProcessorService } from '../job-processor/job-processor.service';
 import { Logger } from '@nestjs/common';
-import { ProcessJobData } from 'src/types/job-process-data';
-
-// redis queue job data interface
-interface QueueJobData {
-  name: string;
-  data: {
-    description: string;
-    id: string;
-    adzuna_id: string;
-  };
-  opts: {
-    attempts: number;
-    delay: number;
-    timestamp: number;
-  };
-  timestamp: number;
-  delay: number;
-  priority: number;
-}
+import { QueueJobData } from '../types/job-process-data';
 
 @Processor('jobQueue')
 export class JobConsumerProcessor {
