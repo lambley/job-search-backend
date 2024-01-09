@@ -1,4 +1,4 @@
-import { Processor, Process } from '@nestjs/bull';
+import { Processor, Process, OnQueueActive } from '@nestjs/bull';
 import { JobProcessorService } from '../job-processor/job-processor.service';
 import { PrismaKeywordJobRepository } from '../repositories/prisma-keyword-job.repository';
 import { Logger } from '@nestjs/common';
@@ -10,6 +10,11 @@ export class JobConsumerProcessor {
     private readonly jobProcessorService: JobProcessorService,
     private readonly keywordJobRepository: PrismaKeywordJobRepository,
   ) {}
+
+  @OnQueueActive()
+  onActive() {
+    Logger.log('Processing jobs from queue', 'JobConsumerProcessor');
+  }
 
   @Process('processJob')
   async handleProcessJob(job: QueueJobData) {

@@ -5,6 +5,7 @@ import {
   Param,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
@@ -126,6 +127,17 @@ export class JobController {
   // should only be used when the keywords lists are updated
   @Get('jobs/reprocess-keywords')
   async reprocessKeywords(): Promise<{ message: string }> {
+    // check if redis is running
+    const queueStatus = await this.jobService.getQueueStatus();
+
+    if (queueStatus.jobsCount === 0 || queueStatus.jobsCount === undefined) {
+      // if redis is not running, return a failure response
+      throw new HttpException(
+        'Job reprocessing failed - queue is down',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     try {
       await this.jobService.reprocessKeywords();
       return { message: 'Job reprocessing completed successfully' };
