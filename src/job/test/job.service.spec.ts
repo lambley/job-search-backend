@@ -9,7 +9,7 @@ import {
 } from './factories/jobFactory';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
-import { PrismaJobRepository } from '../prisma-job.repository';
+import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
 import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
 import { getQueueToken } from '@nestjs/bull';
 

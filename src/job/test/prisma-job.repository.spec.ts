@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaJobRepository } from '../prisma-job.repository';
+import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
 import { PrismaService } from '../../prisma.service';
 import { JobDBCreateRequest, JobDbResponse } from '../types/job.interface';
 

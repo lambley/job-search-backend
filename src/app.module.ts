@@ -6,7 +6,7 @@ import { config } from '../config/configuration';
 import { JobModule } from './job/job.module';
 import { PrismaService } from './prisma.service';
 import { JobService } from './job/job.service';
-import { PrismaJobRepository } from './job/prisma-job.repository';
+import { PrismaJobRepository } from './repositories/prisma-job.repository';
 import { JobProcessorModule } from './job-processor/job-processor.module';
 import { JobConsumerModule } from './job-consumer/job-consumer.module';
 import { CacheModule } from './shared/cache.module';

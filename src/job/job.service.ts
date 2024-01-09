@@ -8,7 +8,7 @@ import {
   JobDbResponse,
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
-import { PrismaJobRepository } from './prisma-job.repository';
+import { PrismaJobRepository } from '../repositories/prisma-job.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 
