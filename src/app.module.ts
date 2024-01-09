@@ -7,6 +7,7 @@ import { JobModule } from './job/job.module';
 import { PrismaService } from './prisma.service';
 import { JobService } from './job/job.service';
 import { PrismaJobRepository } from './repositories/prisma-job.repository';
+import { PrismaKeywordJobRepository } from './repositories/prisma-keyword-job.repository';
 import { JobProcessorModule } from './job-processor/job-processor.module';
 import { JobConsumerModule } from './job-consumer/job-consumer.module';
 import { CacheModule } from './shared/cache.module';
@@ -33,7 +34,12 @@ const allowedOriginsArray: string[] = allowedOrigins.split(',');
     JobConsumerModule,
     CacheModule.forRoot('app', 3600), // 1 hour cache
   ],
-  providers: [JobService, PrismaService, PrismaJobRepository],
+  providers: [
+    JobService,
+    PrismaService,
+    PrismaJobRepository,
+    PrismaKeywordJobRepository,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
