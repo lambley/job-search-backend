@@ -43,4 +43,6 @@ model KeywordJob {
   Job         Job?             @relation(fields: [jobId], references: [id])
   jobId       Int?
   status      KeywordJobStatus
+
+   @@index([jobId], name: "jobId")
 }
