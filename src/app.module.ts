@@ -1,7 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import * as cors from 'cors';
 import { ConfigModule } from '@nestjs/config';
-import { BullModule } from '@nestjs/bull';
+import { BullConfigModule } from './shared/bull-config.module';
 import { config } from '../config/configuration';
 import { JobModule } from './job/job.module';
 import { PrismaService } from './prisma.service';
@@ -21,13 +21,7 @@ const allowedOriginsArray: string[] = allowedOrigins.split(',');
       load: [config],
       isGlobal: true,
     }),
-    BullModule.forRoot({
-      // local config - change later
-      redis: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: 6379,
-      },
-    }),
+    BullConfigModule.forRoot(),
     JobModule,
     JobProcessorModule,
     JobConsumerModule,
