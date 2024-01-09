@@ -12,6 +12,14 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
+// Status field values for KeywordJob table
+enum KeywordJobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
 model Job {
   id                 Int          @id @default(autoincrement())
   adzuna_id          String       @unique
@@ -29,10 +37,10 @@ model Job {
 }
 
 model KeywordJob {
-  id          Int    @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   description String
   adzuna_id   String
-  Job         Job?   @relation(fields: [jobId], references: [id])
+  Job         Job?             @relation(fields: [jobId], references: [id])
   jobId       Int?
-  status      String
+  status      KeywordJobStatus
 }
