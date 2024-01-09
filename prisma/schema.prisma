@@ -39,10 +39,10 @@ model Job {
 model KeywordJob {
   id          Int              @id @default(autoincrement())
   description String
-  adzuna_id   String
+  adzuna_id   String           @unique
   Job         Job?             @relation(fields: [jobId], references: [id])
   jobId       Int?
   status      KeywordJobStatus
 
-   @@index([jobId], name: "jobId")
+  @@index([jobId], name: "jobId")
 }
