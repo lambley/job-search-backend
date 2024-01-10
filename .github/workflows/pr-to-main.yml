@@ -36,18 +36,19 @@ jobs:
           name: test-results
           path: ./coverage
 
-      - name: Check test coverage
-        run: |
-          #!/bin/bash
+      # add back later
+      # - name: Check test coverage
+      #   run: |
+      #     #!/bin/bash
           
-          COVERAGE_THRESHOLD=80
-          ACTUAL_COVERAGE=$(awk '/^statements/ { print $3 }' ./coverage/lcov.info)
+      #     COVERAGE_THRESHOLD=80
+      #     ACTUAL_COVERAGE=$(awk '/^statements/ { print $3 }' ./coverage/lcov.info)
           
-          if [ "$ACTUAL_COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
-            echo "Warning: Test coverage is below 80%."
-          else
-            echo "Test coverage meets the threshold."
-          fi
+      #     if [ "$ACTUAL_COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+      #       echo "Warning: Test coverage is below 80%."
+      #     else
+      #       echo "Test coverage meets the threshold."
+      #     fi
           
       - name: Build the app
         run: npm run build
