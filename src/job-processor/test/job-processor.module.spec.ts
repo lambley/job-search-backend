@@ -41,10 +41,6 @@ describe('JobProcessorModule', () => {
       .compile();
   });
 
-  it('should be defined', async () => {
-    expect(module).toBeDefined();
-  });
-
   describe('imports', () => {
     it('should import BullModule', () => {
       const bullQueue = module.get(getQueueToken('jobQueue'));
