@@ -1,0 +1,54 @@
+name: Test on Pull Request
+env:
+  DEV_DB_URL: ${{ secrets.DEV_DB_URL }}
+  CI: ${{ secrets.CI }}
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    environment: test
+
+    steps:    
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm run test:cov
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ./coverage
+
+      # add back later
+      # - name: Check test coverage
+      #   run: |
+      #     #!/bin/bash
+          
+      #     COVERAGE_THRESHOLD=80
+      #     ACTUAL_COVERAGE=$(awk '/^statements/ { print $3 }' ./coverage/lcov.info)
+          
+      #     if [ "$ACTUAL_COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+      #       echo "Warning: Test coverage is below 80%."
+      #     else
+      #       echo "Test coverage meets the threshold."
+      #     fi
+          
+      - name: Build the app
+        run: npm run build
