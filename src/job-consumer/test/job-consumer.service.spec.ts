@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobConsumerService } from '../job-consumer.service';
 import { JobProcessorService } from '../../job-processor/job-processor.service';
 import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
-import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
+import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaJobRepository';
 
 describe('JobConsumerService', () => {
   let service: JobConsumerService;

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobProcessorModule } from '../job-processor.module';
 import { JobProcessorService } from '../../job-processor/job-processor.service';
 import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
-import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
+import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaJobRepository';
 import { PrismaService } from '../../prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { config } from '../../../config/configuration';

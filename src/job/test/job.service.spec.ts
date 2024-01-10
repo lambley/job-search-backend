@@ -10,7 +10,7 @@ import {
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
-import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
+import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaJobRepository';
 import { getQueueToken } from '@nestjs/bull';
 
 jest.mock('axios');
