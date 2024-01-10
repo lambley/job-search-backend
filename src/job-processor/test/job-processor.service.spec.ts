@@ -69,10 +69,6 @@ describe('JobProcessorService', () => {
     adzuna_id: '4',
   };
 
-  it('should be defined', () => {
-    expect(module).toBeDefined();
-  });
-
   it('should process a job description', async () => {
     const jobProcessorService =
       module.get<JobProcessorService>(JobProcessorService);
