@@ -36,10 +36,6 @@ describe('PrismaKeywordJobRepository', () => {
     );
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('should create a keyword job', async () => {
     const keywordJobSpy = jest
       .spyOn(service, 'create')
