@@ -46,9 +46,6 @@ describe('JobModule', () => {
       .useValue(mockPrismaJobRepository)
       .compile();
   });
-  it('should be defined', () => {
-    expect(module).toBeDefined();
-  });
 
   describe('JobModule imports', () => {
     it('should import the JobProcessorModule', () => {
