@@ -41,7 +41,7 @@ jobs:
           COVERAGE_THRESHOLD=80
           ACTUAL_COVERAGE=$(awk '/^statements/ { print $3 }' ./coverage/lcov.info)
           
-          if [ "$(awk 'BEGIN {print ("'$ACTUAL_COVERAGE'" < "'$COVERAGE_THRESHOLD'")}') == "1" ]; then
+          if [ "$(awk 'BEGIN {print ('"$ACTUAL_COVERAGE"' < '"$COVERAGE_THRESHOLD"') }')" -eq 1 ]; then
             echo "Warning: Test coverage is below 80%."
           else
             echo "Test coverage meets the threshold."
