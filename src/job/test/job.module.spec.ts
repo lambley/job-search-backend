@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobModule } from '../job.module';
 import { JobController } from '../job.controller';
 import { JobService } from '../job.service';
-import { PrismaJobRepository } from '../prisma-job.repository';
-import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
+import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
+import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaJobRepository';
 import { JobProcessorService } from '../../job-processor/job-processor.service';
 import { PrismaService } from '../../prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -45,9 +45,6 @@ describe('JobModule', () => {
       .overrideProvider(PrismaJobRepository)
       .useValue(mockPrismaJobRepository)
       .compile();
-  });
-  it('should be defined', () => {
-    expect(module).toBeDefined();
   });
 
   describe('JobModule imports', () => {

@@ -8,7 +8,7 @@ import {
   JobDbResponse,
 } from './types/job.interface';
 import { Logger } from '@nestjs/common';
-import { PrismaJobRepository } from './prisma-job.repository';
+import { PrismaJobRepository } from '../repositories/prisma-job.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 
@@ -30,6 +30,30 @@ export class JobService {
 
   app_id: string = this.configService.get<string>('ADZUNA_APP_ID');
   app_key: string = this.configService.get<string>('ADZUNA_API_KEY');
+
+  // check jobQueue status
+  async getQueueStatus(): Promise<{ jobsCount: number }> {
+    try {
+      const jobs = this.jobQueue.getJobs(['active', 'waiting', 'delayed']);
+      await Promise.race([
+        jobs,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 1000),
+        ),
+      ]);
+      const jobsCount = await jobs.then((jobs) => jobs.length);
+      const queueStatus = {
+        jobsCount,
+      };
+      return queueStatus;
+    } catch (error) {
+      Logger.error(`Queue status: ${error.message}`, `JobService`);
+      const queueStatus = {
+        jobsCount: 0,
+      };
+      return queueStatus;
+    }
+  }
 
   // url: /api/v1/jobs./refresh?results_per_page=[number]&what=[string]&where=[string]
   // refresh jobs from API

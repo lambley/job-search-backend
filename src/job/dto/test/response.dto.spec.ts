@@ -5,10 +5,6 @@ import {
 } from '../../test/factories/jobFactory';
 
 describe('ResponseDTO', () => {
-  it('should be defined', () => {
-    expect(new ResponseDTO([], 0)).toBeDefined();
-  });
-
   it('should have a data property', () => {
     const response = new ResponseDTO([], 0);
     expect(response.data).toBeDefined();

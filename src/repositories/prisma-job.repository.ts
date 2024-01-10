@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Job } from '@prisma/client';
-import { JobDBCreateRequest } from './types/job.interface';
+import { JobDBCreateRequest } from '../job/types/job.interface';
 import { JobRepository } from './job.repository';
 
 type findUniqueArgs = {
