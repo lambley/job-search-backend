@@ -15,7 +15,7 @@ jobs:
         run: |
           echo "variable from shell environment : $DE_DB_URL"
         env:
-          env_var: ${{ vars.DE_DB_URL }}
+          env_var: ${{ secrets.DE_DB_URL }}
     
       - name: Checkout code
         uses: actions/checkout@v2
