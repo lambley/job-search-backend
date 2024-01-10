@@ -64,10 +64,6 @@ describe('JobService', () => {
   });
 
   describe('refreshJobs', () => {
-    it('should be defined', () => {
-      expect(service.refreshJobs).toBeDefined();
-    });
-
     it('should return an array of jobs', async () => {
       const mockResponse = {
         data: {
