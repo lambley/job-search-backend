@@ -8,8 +8,12 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    environment: test
 
     steps:
+      - name: Display DEV_DB_URL from the 'test' environment
+        run: echo $DEV_DB_URL
+    
       - name: Checkout code
         uses: actions/checkout@v2
 
