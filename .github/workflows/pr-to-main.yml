@@ -1,6 +1,7 @@
 name: Test on Pull Request
 env:
   DEV_DB_URL: ${{ secrets.DEV_DB_URL }}
+  CI: ${{ secrets.CI }}
 on:
   pull_request:
     branches:
