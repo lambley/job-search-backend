@@ -1,0 +1,49 @@
+name: Test on Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ./coverage
+
+      - name: Check test coverage
+        run: |
+          COVERAGE_THRESHOLD=80
+          ACTUAL_COVERAGE=$(awk '/statements/ { print $3 }' ./coverage/lcov.info)
+          if (( $(echo "$ACTUAL_COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+            echo "Warning: Test coverage is below 80%."
+            exit 0 # Exit with success to avoid failing the build
+          else
+            echo "Test coverage meets the threshold."
+            exit 0 # Exit with success
+          fi
