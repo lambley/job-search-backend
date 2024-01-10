@@ -27,11 +27,8 @@ jobs:
       - name: Run linting
         run: npm run lint
 
-      - name: Run tests
-        run: npm run test
-
-      - name: Build the app
-        run: npm run build
+      - name: Run tests with coverage
+        run: npm run test:cov
 
       - name: Upload test results
         uses: actions/upload-artifact@v2
@@ -50,3 +47,6 @@ jobs:
             echo "Test coverage meets the threshold."
             exit 0 # Exit with success
           fi
+          
+      - name: Build the app
+        run: npm run build
