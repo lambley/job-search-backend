@@ -1,5 +1,6 @@
 name: Test on Pull Request
-
+env:
+  DEV_DB_URL: ${{ secrets.DEV_DB_URL }}
 on:
   pull_request:
     branches:
@@ -10,13 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
 
-    steps:
-      - name: Use variables
-        run: |
-          echo "variable from shell environment : $DEV_DB_URL"
-        env:
-          env_var: ${{ secrets.DEV_DB_URL }}
-    
+    steps:    
       - name: Checkout code
         uses: actions/checkout@v2
 
