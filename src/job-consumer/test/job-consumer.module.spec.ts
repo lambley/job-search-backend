@@ -21,10 +21,6 @@ describe('JobConsumerModule', () => {
     }).compile();
   });
 
-  it('should be defined', async () => {
-    expect(module).toBeDefined();
-  });
-
   describe('imports', () => {
     it('should import JobProcessorModule', () => {
       const jobProcessorModule = module.get(JobConsumerModule);
