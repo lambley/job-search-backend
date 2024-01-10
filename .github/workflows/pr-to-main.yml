@@ -40,12 +40,11 @@ jobs:
         run: |
           COVERAGE_THRESHOLD=80
           ACTUAL_COVERAGE=$(awk '/^statements/ { print $3 }' ./coverage/lcov.info)
-          if (( $(echo "$ACTUAL_COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+          
+          if [ "$(awk 'BEGIN {print ("'$ACTUAL_COVERAGE'" < "'$COVERAGE_THRESHOLD'")}') == "1" ]; then
             echo "Warning: Test coverage is below 80%."
-            exit 0 # Exit with success to avoid failing the build
           else
             echo "Test coverage meets the threshold."
-            exit 0 # Exit with success
           fi
           
       - name: Build the app
