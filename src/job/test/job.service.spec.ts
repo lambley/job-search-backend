@@ -9,8 +9,8 @@ import {
 } from './factories/jobFactory';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
-import { PrismaJobRepository } from '../prisma-job.repository';
-import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
+import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
+import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaJobRepository';
 import { getQueueToken } from '@nestjs/bull';
 
 jest.mock('axios');
@@ -64,10 +64,6 @@ describe('JobService', () => {
   });
 
   describe('refreshJobs', () => {
-    it('should be defined', () => {
-      expect(service.refreshJobs).toBeDefined();
-    });
-
     it('should return an array of jobs', async () => {
       const mockResponse = {
         data: {

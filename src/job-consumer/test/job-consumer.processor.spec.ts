@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobConsumerProcessor } from '../job-consumer.processor';
 import { JobProcessorService } from '../../job-processor/job-processor.service';
+import { PrismaKeywordJobRepository } from '../../repositories/prisma-keyword-job.repository';
+import { mockPrismaKeywordJobRepository } from '../../../test/mocks/mockPrismaKeywordJobRepository';
 import { QueueJobData } from '../../types/job-process-data';
 
 describe('JobConsumerProcessor', () => {
@@ -18,16 +20,16 @@ describe('JobConsumerProcessor', () => {
             saveKeywordsToDatabase: jest.fn(),
           },
         },
+        PrismaKeywordJobRepository,
       ],
-    }).compile();
+    })
+      .overrideProvider(PrismaKeywordJobRepository)
+      .useValue(mockPrismaKeywordJobRepository)
+      .compile();
 
     jobConsumerProcessor =
       module.get<JobConsumerProcessor>(JobConsumerProcessor);
     jobProcessorService = module.get<JobProcessorService>(JobProcessorService);
-  });
-
-  it('should be defined', () => {
-    expect(jobConsumerProcessor).toBeDefined();
   });
 
   it('should handle processJob', async () => {

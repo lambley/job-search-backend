@@ -34,8 +34,8 @@ brew install redis
 Migrating the database:
 
 ```zsh
-npm prisma:generate
-npm prisma:migration:run
+npm run prisma:generate
+npm run prisma:migration:run
 ```
 
 ## Running the app

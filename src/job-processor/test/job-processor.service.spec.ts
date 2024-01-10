@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobProcessorService } from '../job-processor.service';
 import { WordTokenizer } from 'natural/lib/natural/tokenizers';
 import { words as StopWords } from 'natural/lib/natural/util/stopwords';
-import { PrismaJobRepository } from '../../job/prisma-job.repository';
+import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
 import { PrismaService } from '../../prisma.service';
 import {
   softwareEngineeringKeywords,
@@ -68,10 +68,6 @@ describe('JobProcessorService', () => {
     id: '4',
     adzuna_id: '4',
   };
-
-  it('should be defined', () => {
-    expect(module).toBeDefined();
-  });
 
   it('should process a job description', async () => {
     const jobProcessorService =

@@ -3,7 +3,7 @@ import { WordTokenizer } from 'natural/lib/natural/tokenizers';
 import { words as StopWords } from 'natural/lib/natural/util/stopwords';
 import { Logger } from '@nestjs/common';
 import { ProcessJobData } from 'src/types/job-process-data';
-import { PrismaJobRepository } from '../job/prisma-job.repository';
+import { PrismaJobRepository } from '../repositories/prisma-job.repository';
 import {
   softwareEngineeringKeywords,
   generalSoftSkillsKeywords,

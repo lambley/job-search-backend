@@ -9,8 +9,8 @@ import {
 } from './factories/jobFactory';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../../shared/cache.service';
-import { PrismaJobRepository } from '../prisma-job.repository';
-import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaRepository';
+import { PrismaJobRepository } from '../../repositories/prisma-job.repository';
+import { mockPrismaJobRepository } from '../../../test/mocks/mockPrismaJobRepository';
 import { getQueueToken } from '@nestjs/bull';
 import { ResponseDTO } from '../dto/response.dto';
 

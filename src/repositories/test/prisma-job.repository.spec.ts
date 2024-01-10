@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaJobRepository } from '../prisma-job.repository';
 import { PrismaService } from '../../prisma.service';
-import { JobDBCreateRequest, JobDbResponse } from '../types/job.interface';
+import {
+  JobDBCreateRequest,
+  JobDbResponse,
+} from '../../job/types/job.interface';
 
 const mockCreateJob: JobDBCreateRequest = {
   adzuna_id: 'adzuna_id',
@@ -41,10 +44,6 @@ describe('PrismaJobRepository', () => {
     }).compile();
 
     service = module.get<PrismaJobRepository>(PrismaJobRepository);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   it('should create a job', async () => {
