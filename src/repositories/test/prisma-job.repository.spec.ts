@@ -46,10 +46,6 @@ describe('PrismaJobRepository', () => {
     service = module.get<PrismaJobRepository>(PrismaJobRepository);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('should create a job', async () => {
     const jobSpy = jest
       .spyOn(service, 'create')
