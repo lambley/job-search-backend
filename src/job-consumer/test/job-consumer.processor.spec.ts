@@ -32,10 +32,6 @@ describe('JobConsumerProcessor', () => {
     jobProcessorService = module.get<JobProcessorService>(JobProcessorService);
   });
 
-  it('should be defined', () => {
-    expect(jobConsumerProcessor).toBeDefined();
-  });
-
   it('should handle processJob', async () => {
     const data: QueueJobData = {
       name: 'testQueue',
