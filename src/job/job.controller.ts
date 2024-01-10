@@ -5,7 +5,6 @@ import {
   Param,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobResponse, JobDbResponse } from './types/job.interface';
